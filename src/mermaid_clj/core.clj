@@ -1,7 +1,8 @@
 (ns mermaid-clj.core
   (:require [clojure.data.json :as json]
             [clojure.java.shell :as shell]
-            [clj-http.client :as client])
+            [clj-http.client :as client]
+            [clojure.string])
   (:import java.util.Base64
            [java.io File]))
 
@@ -155,14 +156,14 @@
 (defn async
   [from to message & forms]
   (group
-   (node from :async to message)
-   (apply group forms)))
+    (node from :async to message)
+    (apply group forms)))
 
 (defn message
   [from to message & forms]
   (group
-   (node from :message to message)
-   (apply group forms)))
+    (node from :message to message)
+    (apply group forms)))
 
 (defn alt
   [text form & others]
@@ -198,10 +199,10 @@
     (shell/sh "xdg-open"
               (format mermaid-view
                       (encode-base64
-                       (json/write-str
-                        {:code diagram
-                         :mermaid {:theme "default"}
-                         :updateEditor false})))
+                        (json/write-str
+                          {:code diagram
+                           :mermaid {:theme "default"}
+                           :updateEditor false})))
               :env (assoc current-env "BROWSER" "firefox"))))
 
 (defn browser-edit
@@ -210,10 +211,10 @@
     (shell/sh "xdg-open"
               (format mermaid-edit
                       (encode-base64
-                       (json/write-str
-                        {:code diagram
-                         :mermaid {:theme "default"}
-                         :updateEditor false})))
+                        (json/write-str
+                          {:code diagram
+                           :mermaid {:theme "default"}
+                           :updateEditor false})))
               :env (assoc current-env "BROWSER" "firefox"))))
 
 (defn download-image
@@ -235,55 +236,55 @@
 (comment
   (def sample
     (sequence-diagram
-     (participants :b :c :d :e :a)
-     (node :a :call :b "call")
-     (synchronous
-      :a :b "send"
+      (participants :b :c :d :e :a)
+      (node :a :call :b "call")
       (synchronous
-       :b :c
-       (loop-block
-        "retry"
-        (highlight :yellow
-                   (synchronous :c :c "query db")
-                   (synchronous :c :a "fetch data")
-                   (synchronous :d :f "woops"))))
-      (synchronous
-       :b :d "out" "d"))
-     (alt "true"
-          (loop-block "retry"
-                      (synchronous :c :d "query db"
-                                   (note-over :c :d "over c and d"))
-                      (synchronous :c :c "query db"
-                                   (note-over :c "over c")))
-          "false-async"
-          (async :c :d "WAIT")
-          "false-sync"
-          (synchronous :c :d "query db"))
-     (highlight :gray
-                (opt "alternative"
-                     (highlight :red
-                                (synchronous :c :a
-                                             (note-left :a "this is note left of a")))
-                     (synchronous :d :e)))
-     (parallel "send message"
-               (async :a :g "MESSAGE"
-                      (synchronous :g :h "save data"))
-               "deliver email"
-               (async :b :e "ARCHIVE"
-                      (message :e :a "ARCHIVED"))
-               "webhook"
-               (synchronous :a :third-party "POST /api/webhook" "200 OK"))
-     (highlight :blue
-                (note-right :a "this is note right of a")
-                (synchronous :a :b "send"
-                             (synchronous :b :c
-                                          (loop-block "retry"
-                                                      (synchronous :c :c "query db")
-                                                      (synchronous :c :a "fetch data")
-                                                      (synchronous :d :f "woops")))
-                             (synchronous :b :d "out" "d")))))
+        :a :b "send"
+        (synchronous
+          :b :c
+          (loop-block
+            "retry"
+            (highlight :yellow
+                       (synchronous :c :c "query db")
+                       (synchronous :c :a "fetch data")
+                       (synchronous :d :f "woops"))))
+        (synchronous
+          :b :d "out" "d"))
+      (alt "true"
+           (loop-block "retry"
+                       (synchronous :c :d "query db"
+                                    (note-over :c :d "over c and d"))
+                       (synchronous :c :c "query db"
+                                    (note-over :c "over c")))
+           "false-async"
+           (async :c :d "WAIT")
+           "false-sync"
+           (synchronous :c :d "query db"))
+      (highlight :gray
+                 (opt "alternative"
+                      (highlight :red
+                                 (synchronous :c :a
+                                              (note-left :a "this is note left of a")))
+                      (synchronous :d :e)))
+      (parallel "send message"
+                (async :a :g "MESSAGE"
+                       (synchronous :g :h "save data"))
+                "deliver email"
+                (async :b :e "ARCHIVE"
+                       (message :e :a "ARCHIVED"))
+                "webhook"
+                (synchronous :a :third-party "POST /api/webhook" "200 OK"))
+      (highlight :blue
+                 (note-right :a "this is note right of a")
+                 (synchronous :a :b "send"
+                              (synchronous :b :c
+                                           (loop-block "retry"
+                                                       (synchronous :c :c "query db")
+                                                       (synchronous :c :a "fetch data")
+                                                       (synchronous :d :f "woops")))
+                              (synchronous :b :d "out" "d")))))
   (println
-   sample)
+    sample)
 
   (download-image sample)
   (browser-edit sample)
