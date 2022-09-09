@@ -212,9 +212,8 @@
   "Make a synchronous reply from an actor to another."
   [actor-from actor-to message]
   (use-like-this "all data can be a symbol, keyword, or keyword."
-    (call-async :alice :bob "hihi")
-    (call-async 'bob 'alice "hoho"))
-
+    (reply-sync :alice :bob "hihi")
+    (reply-sync 'bob 'alice "hoho"))
   {:type    :reply/sync
    :from    actor-from
    :to      actor-to
@@ -224,7 +223,9 @@
 (defn reply-activate
   "Make a reply from an actor to another and terminate the activation."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword.")
+  (use-like-this "all data can be a symbol, keyword, or keyword."
+    (reply-activate :alice :bob "hihi")
+    (reply-activate 'bob 'alice "hoho"))
   {:type    :reply/activate
    :from    actor-from
    :to      actor-to
@@ -234,7 +235,9 @@
 (defn reply-cross
   "Make a reply from an actor to another with a cross-shaped arrow."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword.")
+  (use-like-this "all data can be a symbol, keyword, or keyword."
+    (reply-cross :alice :bob "hihi")
+    (reply-cross 'bob 'alice "hoho"))
   {:type    :reply/async
    :from    actor-from
    :to      actor-to
@@ -245,7 +248,9 @@
 (defn reply-async
   "Make an asynchronous reply from an actor to another."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword.")
+  (use-like-this "all data can be a symbol, keyword, or keyword."
+    (reply-async :alice :bob "hihi")
+    (reply-async 'bob 'alice "hoho"))
   {:type    :call/async
    :from    actor-from
    :to      actor-to
@@ -354,6 +359,12 @@
             (= "activate" component-subtype)
             ()
             (= "cross" component-subtype)
+            ()
+            (= "async" component-subtype)
+            ())
+          (= "with" component-type)
+          (cond
+            (= "sync" component-subtype)
             ()
             (= "async" component-subtype)
             ()))))
