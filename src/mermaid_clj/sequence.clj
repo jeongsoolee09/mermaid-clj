@@ -6,9 +6,7 @@
   (:import java.util.Base64
            [java.io File]))
 
-
 (defmacro use-like-this [& _])
-
 
 ;; ============ Lookup Tables ============
 
@@ -58,94 +56,12 @@
   [actor]
   (str "\"" (string/replace (name actor) #"\-" " ")))
 
-
-;; ============ blocks ============
-
-(defn loop
-  "Mark the following content as a loop block."
-  [label & forms]
-  {:type            :block/loop
-   :label           label
-   :following-forms forms})
-
-
-(defn note-left
-  "Place the note left-side of a given actor."
-  [actor-to-put-text-on-left note]
-  {:type  :block/note-left
-   :actor actor-to-put-text-on-left
-   :note  (multi-line note 20)})
-
-
-(defn note-right
-  "Place the note right-side of a given actor."
-  [actor-to-put-text-on-right note]
-  {:type  :block/note-right
-   :actor actor-to-put-text-on-right
-   :note  (multi-line note 20)})
-
-
-(defn note-over
-  "Place the note over possibly two actors."
-  ([actor1 note]
-   (note-over actor1 nil note))
-  ([actor1 actor2 note]
-   {:type   :block/note-over
-    :actor1 actor1
-    :actor2 actor2
-    :note   (multi-line note 60)}))
-
-
-(defn background-highlight
-  "Highlight the background for the following content."
-  [color & forms]
-  {:type            :block/highlight
-   :color           (color->rgb color)
-   :following-forms forms})
-
-
-(defn alternative
-  "Mark the following content as an Alternative block."
-  [if-condition-description if-forms & others]
-  (use-like-this
-    (alternative
-      ["x=1" [(call-sync :a :b "hoho")
-              (reply-sync :b :a "hihi")]]
-      ["x=2" [(call-activate :a :b "hoho")
-              (reply-activate :b :a "hihi")]]
-      ["x=3" [(call-async :a :b "hoho")
-              (reply-async :b :a "hihi")]]))
-  {:type            :block/alternative
-   :condition       if-condition-description
-   :following-forms if-forms
-   :others          others})
-
-
-(defn parallel
-  "Mark the following content as an Parallel block."
-  [description forms & others]
-  {:type            :block/parallel
-   :description     description
-   :following-forms forms
-   :others          others})
-
-
-(defn optional
-  "Mark the following content as an Optional block."
-  [description & forms]
-  {:type            :block/optional
-   :description     description
-   :following-forms forms})
-
-
 ;; ============ labels ============
-
 
 (defn autonumber
   "Add an Autonumber label."
   []
   {:type :label/autonumber})
-
 
 (defn participants
   "Add the following actors as participants."
@@ -153,125 +69,114 @@
   {:type   :participants
    :actors :label/participating-actors})
 
-
 ;; ============ calls ============
-
 
 (defn call-sync
   "Make a synchronous call from an actor to another."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (call-sync :alice :bob "hihi")
-    (call-sync 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (call-sync :alice :bob "hihi")
+                 (call-sync 'bob 'alice "hoho"))
   {:type    :call/sync
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 (defn call-activate
   "Make a call from an actor to another and activate the receiver."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (call-activate :alice :bob "hihi")
-    (call-activate 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (call-activate :alice :bob "hihi")
+                 (call-activate 'bob 'alice "hoho"))
   {:type    :call/activate
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 (defn call-cross
   "Make a call from an actor to another with a cross-shaped arrow."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (call-cross :alice :bob "hihi")
-    (call-cross 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (call-cross :alice :bob "hihi")
+                 (call-cross 'bob 'alice "hoho"))
   {:type    :call/cross
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 (defn call-async
   "Make an asynchronous call from an actor to another with a cross-shaped arrow."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (call-async :alice :bob "hihi")
-    (call-async 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (call-async :alice :bob "hihi")
+                 (call-async 'bob 'alice "hoho"))
   {:type    :call/async
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 ;; ============ replys ============
-
 
 (defn reply-sync
   "Make a synchronous reply from an actor to another."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (reply-sync :alice :bob "hihi")
-    (reply-sync 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (reply-sync :alice :bob "hihi")
+                 (reply-sync 'bob 'alice "hoho"))
   {:type    :reply/sync
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 (defn reply-activate
   "Make a reply from an actor to another and terminate the activation."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (reply-activate :alice :bob "hihi")
-    (reply-activate 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (reply-activate :alice :bob "hihi")
+                 (reply-activate 'bob 'alice "hoho"))
   {:type    :reply/activate
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 (defn reply-cross
   "Make a reply from an actor to another with a cross-shaped arrow."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (reply-cross :alice :bob "hihi")
-    (reply-cross 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (reply-cross :alice :bob "hihi")
+                 (reply-cross 'bob 'alice "hoho"))
   {:type    :reply/async
    :from    actor-from
    :to      actor-to
-   :message message
    :message message})
-
 
 (defn reply-async
   "Make an asynchronous reply from an actor to another."
   [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or keyword."
-    (reply-async :alice :bob "hihi")
-    (reply-async 'bob 'alice "hoho"))
+  (use-like-this "all data can be a symbol, keyword, or a string."
+                 (reply-async :alice :bob "hihi")
+                 (reply-async 'bob 'alice "hoho"))
   {:type    :call/async
    :from    actor-from
    :to      actor-to
    :message message})
 
-
 ;; ============ back and forth ============
-
 
 (defn with-sync
   ([actor-from actor-to & forms]
    (with-sync actor-from actor-to "calls" "replies"))
   ([actor-from actor-to
     message-from message-to & forms]
+   (use-like-this "all data can be a symbol, keyword, or a string."
+                  (with-sync :alice :bob "hihi" "hoho"
+                    (call-sync :bob :alice "hehe")))
    {:type            :with/sync
     :from            actor-from
     :to              actor-to
     :message-from    message-from
     :message-to      message-to
     :following-forms forms}))
-
 
 (defn with-async
   ([actor-from actor-to & forms]
@@ -285,6 +190,76 @@
     :message-to      message-to
     :following-forms forms}))
 
+;; ============ blocks ============
+
+(defn loop
+  "Mark the following content as a loop block."
+  [label & forms]
+  {:type            :block/loop
+   :label           label
+   :following-forms forms})
+
+(defn note-left
+  "Place the note left-side of a given actor."
+  [actor-to-put-text-on-left note]
+  {:type  :block/note-left
+   :actor actor-to-put-text-on-left
+   :note  (multi-line note 20)})
+
+(defn note-right
+  "Place the note right-side of a given actor."
+  [actor-to-put-text-on-right note]
+  {:type  :block/note-right
+   :actor actor-to-put-text-on-right
+   :note  (multi-line note 20)})
+
+(defn note-over
+  "Place the note over possibly two actors."
+  ([actor1 note]
+   (note-over actor1 nil note))
+  ([actor1 actor2 note]
+   {:type   :block/note-over
+    :actor1 actor1
+    :actor2 actor2
+    :note   (multi-line note 60)}))
+
+(defn background-highlight
+  "Highlight the background for the following content."
+  [color & forms]
+  {:type            :block/highlight
+   :color           (color->rgb color)
+   :following-forms forms})
+
+(defn alternative
+  "Mark the following content as an Alternative block."
+  [if-condition-description if-forms & others]
+  (use-like-this
+   (alternative
+    ["x=1" [(call-sync :a :b "hoho")
+            (reply-sync :b :a "hihi")]]
+    ["x=2" [(call-activate :a :b "hoho")
+            (reply-activate :b :a "hihi")]]
+    ["x=3" [(call-async :a :b "hoho")
+            (reply-async :b :a "hihi")]]))
+  {:type            :block/alternative
+   :condition       if-condition-description
+   :following-forms if-forms
+   :others          others})
+
+(defn parallel
+  "Mark the following content as an Parallel block."
+  [description forms & others]
+  {:type            :block/parallel
+   :description     description
+   :following-forms forms
+   :others          others})
+
+(defn optional
+  "Mark the following content as an Optional block."
+  [description & forms]
+  {:type            :block/optional
+   :description     description
+   :following-forms forms})
 
 ;; ============ Mermaid.js URL Templates ============
 
@@ -337,8 +312,7 @@
                 (= "alternative" component-subtype)
                 (apply str (interpose " "
                                       (flatten ["alt" (:condition component) "\n"
-                                                (mapv assemble (:following-forms component))
-                                                ])))
+                                                (mapv assemble (:following-forms component))])))
                 (= "parallel" component-subtype)
                 ()
                 (= "optional" component-subtype)
@@ -369,7 +343,6 @@
             (= "async" component-subtype)
             ()))))
 
-
 (defn encode-base64
   "Encode the given string into UTF-8."
   [string]
@@ -381,10 +354,10 @@
     (shell/sh "xdg-open"
               (format mermaid-view
                       (encode-base64
-                        (json/write-str
-                          {:code         diagram
-                           :mermaid      {:theme "default"}
-                           :updateEditor false})))
+                       (json/write-str
+                        {:code         diagram
+                         :mermaid      {:theme "default"}
+                         :updateEditor false})))
               :env (assoc current-env "BROWSER" "firefox"))))
 
 (defn browser-edit
@@ -393,10 +366,10 @@
     (shell/sh "xdg-open"
               (format mermaid-edit
                       (encode-base64
-                        (json/write-str
-                          {:code         diagram
-                           :mermaid      {:theme "default"}
-                           :updateEditor false})))
+                       (json/write-str
+                        {:code         diagram
+                         :mermaid      {:theme "default"}
+                         :updateEditor false})))
               :env (assoc current-env "BROWSER" "firefox"))))
 
 (defn download-image
@@ -405,9 +378,9 @@
   ([diagram destination]
    (let [url (format mermaid-img
                      (encode-base64
-                       (json/write-str
-                         {:code    diagram
-                          :mermaid {:theme "default"}})))]
+                      (json/write-str
+                       {:code    diagram
+                        :mermaid {:theme "default"}})))]
      (clojure.java.io/copy
-       (:body (client/get url {:as :stream}))
-       (File. destination)))))
+      (:body (client/get url {:as :stream}))
+      (File. destination)))))
