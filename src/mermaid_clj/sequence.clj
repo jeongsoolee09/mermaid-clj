@@ -6,16 +6,13 @@
 
 (defmacro use-like-this [& _])
 
-;; ============ Lookup Tables ============
-
 (defn color->rgb [color]
-  (cond [(= (name color) :green)  "rgb(0,255,0,0.1)"
-         (= (name color) :blue)   "rgb(0,0,255,0.1)"
-         (= (name color) :red)    "rgb(255,0,0,0.2)"
-         (= (name color) :yellow) "rgb(255,255,0,0.5)"
-         (= (name color) :gray)   "rgb(0,0,0,0.1)"
-         :else                    "rgb(0,0,0,0)"])) ; fall back to black
-
+  (cond (= (name color) :green)  "rgb(0,255,0,0.1)"
+        (= (name color) :blue)   "rgb(0,0,255,0.1)"
+        (= (name color) :red)    "rgb(255,0,0,0.2)"
+        (= (name color) :yellow) "rgb(255,255,0,0.5)"
+        (= (name color) :gray)   "rgb(0,0,0,0.1)"
+        :else                    "rgb(0,0,0,0)")) ; fall back to black
 
 ;; ============ DSL APIs ============
 
@@ -27,15 +24,18 @@
 ;; ============ labels ============
 
 (defn autonumber
-  "Add an Autonumber label."
+  "Autonumber label."
   []
   {:type :label/autonumber})
 
 (defn participants
-  "Add the following actors as participants."
+  "Participants."
   [& participating-actors]
   {:type   :participants
    :actors :label/participating-actors})
+
+(defn activate
+  "")
 
 ;; ============ arrows ============
 
@@ -62,10 +62,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (solid-arrow :alice :bob "hihi")
     (solid-arrow 'bob 'alice "hoho"))
-  {:type    :solid/arrow
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :solid/arrow
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -77,10 +77,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (solid-cross :alice :bob "hihi")
     (solid-cross 'bob 'alice "hoho"))
-  {:type    :solid/cross
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :solid/cross
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -92,10 +92,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (solid-open :alice :bob "hihi")
     (solid-open 'bob 'alice "hoho"))
-  {:type    :solid/open
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :solid/open
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -107,10 +107,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (dotted-line :alice :bob "hihi")
     (dotted-line 'bob 'alice "hoho"))
-  {:type    :dotted/line
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :dotted/line
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -122,10 +122,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (dotted-arrow :alice :bob "hihi")
     (dotted-arrow 'bob 'alice "hoho"))
-  {:type    :dotted/arrow
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :dotted/arrow
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -137,10 +137,10 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (dotted-cross :alice :bob "hihi")
     (dotted-cross 'bob 'alice "hoho"))
-  {:type    :dotted/cross
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :dotted/cross
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
@@ -152,63 +152,27 @@
   (use-like-this "all data can be a symbol, keyword, or a string."
     (dotted-open :alice :bob "hihi")
     (dotted-open 'bob 'alice "hoho"))
-  {:type    :dotted/open
-   :from    actor-from
-   :to      actor-to
-   :message message
+  {:type       :dotted/open
+   :from       actor-from
+   :to         actor-to
+   :message    message
    :activate   activate
    :deactivate deactivate})
 
-;;; ============ back and forth ============
-
-(defn with-sync
-  ([actor-from actor-to & forms]
-   (with-sync actor-from actor-to "calls" "replies") forms)
-  ([actor-from actor-to
-    message-from message-to & forms]
-   (use-like-this "all data can be a symbol, keyword, or a string."
-     (with-sync :alice :bob "hihi" "hoho"
-       (call-sync :bob :alice "hehe")))
-   {:type            :with/sync
-    :from            actor-from
-    :to              actor-to
-    :message-from    message-from
-    :message-to      message-to
-    :following-forms forms}))
-
-(defn with-async
-  ([actor-from actor-to & forms]
-   (with-async actor-from actor-to "calls" "replies") forms)
-  ([actor-from actor-to
-    message-from message-to & forms]
-   {:type            :with/async
-    :from            actor-from
-    :to              actor-to
-    :message-from    message-from
-    :message-to      message-to
-    :following-forms forms}))
-
-;;; ============ Blocks ============
-
-(defn loop
-  "Mark the following content as a loop block."
-  [label & forms]
-  {:type            :block/loop
-   :label           label
-   :following-forms forms})
+;;; ============ Notes ============
 
 (defn note-left
   "Place the note left-side of a given actor."
-  [actor-to-put-text-on-left note]
-  {:type  :block/note-left
-   :actor actor-to-put-text-on-left
+  [actor note]
+  {:type  :note/left
+   :actor actor
    :note  note})
 
 (defn note-right
   "Place the note right-side of a given actor."
-  [actor-to-put-text-on-right note]
-  {:type  :block/note-right
-   :actor actor-to-put-text-on-right
+  [actor note]
+  {:type  :note/right
+   :actor actor
    :note  note})
 
 (defn note-over
@@ -216,34 +180,43 @@
   ([actor note]
    (note-over actor nil note))
   ([actor1 actor2 note]
-   {:type   :block/note-over
+   {:type   :note/over
     :actor1 actor1
     :actor2 actor2
     :note   note}))
 
-(defn background-highlight
-  "Highlight the background for the following content."
+;;; ============ Blocks ============
+
+(defn loop
+  "Loop block with a label."
+  [label & forms]
+  {:type            :block/loop
+   :label           label
+   :following-forms forms})
+
+(defn highlight
+  "Highlight the background with a given color."
   [color & forms]
   {:type            :block/highlight
    :color           (color->rgb color)
    :following-forms forms})
 
 (defn alternative
-  "Mark the following content as an Alternative block."
-  [& condition-description-and-forms]
+  "Alternative block with conditions."
+  [& condition-and-forms]
   (use-like-this
     (alternative
-      ["x=1" [(call-sync :a :b "hoho")
-              (reply-sync :b :a "hihi")]]
-      ["x=2" [(call-activate :a :b "hoho")
-              (reply-activate :b :a "hihi")]]
-      ["x=3" [(call-async :a :b "hoho")
-              (reply-async :b :a "hihi")]]))
+      ["x=1" [(solid-arrow :a :b "hoho")
+              (dotted-arrow :b :a "hihi")]]
+      ["x=2" [(solid-arrow :a :b "hoho")
+              (dotted-arrow :b :a "hihi")]]
+      ["x=3" [(solid-arrow :a :b "hoho")
+              (dotted-arrow :b :a "hihi")]]))
   {:type            :block/alternative
-   :following-forms condition-description-and-forms})
+   :following-forms condition-and-forms})
 
 (defn parallel
-  "Mark the following content as an Parallel block."
+  "Parallel block with a description."
   [description forms & others]
   {:type            :block/parallel
    :description     description
@@ -251,7 +224,7 @@
    :others          others})
 
 (defn optional
-  "Mark the following content as an Optional block."
+  "Optional block with a description."
   [description & forms]
   {:type            :block/optional
    :description     description
@@ -276,7 +249,7 @@
                 (= "participants" component-subtype)
                 (apply str (interpose " "
                                       (flatten ["\n" "participant"
-                                                (mapv actor-name (:actor component))]))))
+                                                (:actor component)]))))
           (= "block" component-type)
           (cond (= "loop" component-subtype)
                 (apply str (interpose " "
@@ -329,12 +302,6 @@
             (= "activate" component-subtype)
             ()
             (= "cross" component-subtype)
-            ()
-            (= "async" component-subtype)
-            ())
-          (= "with" component-type)
-          (cond
-            (= "sync" component-subtype)
             ()
             (= "async" component-subtype)
             ()))))
