@@ -20,6 +20,7 @@
     [true true] (throw (IllegalArgumentException.))))
 
 (defn arrow->str [arrow]
+  "Get the arrow representation of a given arrow."
   (let [type1      (namespace (arrow :type))
         type2      (name (arrow :type))
         activate   (arrow :activate)
@@ -39,7 +40,7 @@
 (defn actor-name
   "Get the name of the actor by replacing the hyphens in an actor name."
   [actor]
-  (str "\"" (string/replace (name actor) #"\-" " ")))
+  (str "\"" (string/replace (name actor) #"\-" " ") "\""))
 
 ;; ============ labels ============
 
@@ -259,70 +260,94 @@
    :description     description
    :following-forms forms})
 
-;; ============ User Utility Functions ============
+(defn sequence-diagram
+  "Make a Sequence Diagram."
+  [& forms]
+  {:type            :sequence-diagramam
+   :following-forms forms})
 
-(defn assemble [component]
-  (let [component-type    (namespace (component :type))
-        component-subtype (name (component :type))]
-    (cond (= "label" component-type)
-          (cond (= "autonumber" component-subtype)
-                "autonumber"
-                (= "participants" component-subtype)
-                (apply str (interpose " " (flatten ["participant" (:actors component)])))
-                (= "activate" component-subtype)
-                (str "activate " (:actor component))
-                (= "deactivate" component-subtype)
-                (str "deactivate " (:actor component)))
-          (= "solid" component-type)
-          (cond (= "line" component-subtype)
-                ()
-                (= "arrow" component-subtype)
-                ()
-                (= "cross" component-subtype)
-                ()
-                (= "open" component-subtype)
-                ())
-          (= "dotted" component-type)
-          (cond (= "line" component-subtype)
-                ()
-                (= "arrow" component-subtype)
-                ()
-                (= "cross" component-subtype)
-                ()
-                (= "open" component-subtype)
-                ())
-          (= "note" component-type)
-          (cond (= "left" component-subtype)
-                (apply str (interpose " " ["Note left of"
-                                           (:actor component) ":"
-                                           (:note component)]))
-                (= "right" component-subtype)
-                (apply str (interpose " "
-                                      ["Note right of"
-                                       (:actor component) ":"
-                                       (:note component)]))
-                (= "over" component-subtype)
-                (apply str (interpose " "
-                                      ["Note over"
-                                       (:actor1 component)
-                                       (when (:actor2 component)
-                                         "," (:actor2 component)) ":"
-                                       (:note component)])))
-          (= "block" component-type)
-          (cond (= "loop" component-subtype)
-                (apply str (interpose " " (flatten ["loop" (:label component) "\n"
-                                                    (mapv assemble (:following-forms component))
-                                                    ["\nend"]])))
-                (= "highlight" component-subtype)
-                (apply str (interpose " "
-                                      (flatten ["rect" (:color component) "\n"
-                                                (mapv assemble (:following-forms component))
-                                                "\nend"])))
-                (= "alternative" component-subtype)
-                (apply str (interpose " "
-                                      (flatten ["alt" (:condition component) "\n"
-                                                (mapv assemble (:following-forms component))])))
-                (= "parallel" component-subtype)
-                ()
-                (= "optional" component-subtype)
-                ()))))
+;; ============ predicates ============
+
+(defn label? [component]
+  (= "label" (namespace (:type component))))
+
+(defn arrow? [component]
+  (or (= "solid" (namespace (:type component)))
+      (= "dotted" (namespace (:type component)))))
+
+(defn note? [component]
+  (= "note" (namespace (:type component))))
+
+(defn block? [component]
+  (= "block" (namespace (:type component))))
+
+;; ============ renderers ============
+
+(defn render-label [label]
+  (let [label-type (name (label :type))]
+    (cond (= "autonumber" label-type)
+          "autonumber"
+          (= "participants" label-type)
+          (apply str (interpose " " (flatten ["participant" (:actors label)])))
+          (= "activate" label-type)
+          (str "activate " (:actor label))
+          (= "deactivate" label-type)
+          (str "deactivate " (:actor label)))))
+
+(defn render-arrow [arrow])
+
+(defn render-note [note]
+  (let [note-type (name (note :type))]
+    (cond (= "left" note-type)
+          (apply str (interpose " " ["Note left of"
+                                     (:actor note) ":"
+                                     (:note note)]))
+          (= "right" note-type)
+          (apply str (interpose " "
+                                ["Note right of"
+                                 (:actor note) ":"
+                                 (:note note)]))
+          (= "over" note-type)
+          (apply str (interpose " "
+                                ["Note over"
+                                 (:actor1 note)
+                                 (when (:actor2 note)
+                                   "," (:actor2 note)) ":"
+                                 (:note note)])))))
+
+(defn render-block [block]
+  ;;; TODO
+  (let [block-type (name (block :type))]
+    (cond (= "loop" block-type)
+          (apply str (interpose " " (flatten ["loop" (:label block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              ["\nend"]])))
+          (= "highlight" block-type)
+          (apply str (interpose " " (flatten ["rect" (:color block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              "\nend"])))
+          (= "alternative" block-type)
+          (apply str (interpose " " (flatten ["alt" (:condition block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              "\nend"])))
+          (= "parallel" block-type)
+          (apply str (interpose " " (flatten ["par" (:condition block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              "\nend"])))
+          (= "optional" block-type)
+          (apply str (interpose " " (flatten ["opt" (:condition block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              "\nend"])))
+          (= "sequence-diagram" block-type)
+          (apply str (interpose " " (flatten ["opt" (:condition block) "\n"
+                                              (mapv assemble (:following-forms block))
+                                              "\nend"]))))))
+
+(defn dispatch-renderer [component]
+  (cond (label? component) render-label
+        (arrow? component) render-arrow
+        (note? component)  render-note
+        (block? component) render-block))
+
+(defn render [component]
+  ((dispatch-renderer component) component))
