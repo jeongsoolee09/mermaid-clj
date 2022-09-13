@@ -14,6 +14,8 @@
         (= (name color) :gray)   "rgb(0,0,0,0.1)"
         :else                    "rgb(0,0,0,0)")) ; fall back to black
 
+
+
 ;; ============ DSL APIs ============
 
 (defn actor-name
@@ -31,11 +33,20 @@
 (defn participants
   "Participants."
   [& participating-actors]
-  {:type   :participants
-   :actors :label/participating-actors})
+  {:type   :label/participants
+   :actors participating-actors})
 
 (defn activate
-  "")
+  "Activate the receiver."
+  [actor]
+  {:type  :label/activate
+   :actor actor})
+
+(defn deactivate
+  "Deactivate the receiver."
+  [actor]
+  {:type  :label/deactivate
+   :actor actor})
 
 ;; ============ arrows ============
 
@@ -230,49 +241,60 @@
    :description     description
    :following-forms forms})
 
-;;; ============ Mermaid.js URL Templates ============
-
-(def mermaid-edit "https://mermaid-js.github.io/mermaid-live-editor/#/edit/%s")
-
-(def mermaid-view "https://mermaid-js.github.io/mermaid-live-editor/#/view/%s")
-
-(def mermaid-img "https://mermaid.ink/img/%s")
-
 ;; ============ User Utility Functions ============
 
-(defn ^:string assemble [component]
+(defn assemble [component]
   (let [component-type    (namespace (component :type))
         component-subtype (name (component :type))]
     (cond (= "label" component-type)
           (cond (= "autonumber" component-subtype)
                 "autonumber"
                 (= "participants" component-subtype)
-                (apply str (interpose " "
-                                      (flatten ["\n" "participant"
-                                                (:actor component)]))))
-          (= "block" component-type)
-          (cond (= "loop" component-subtype)
-                (apply str (interpose " "
-                                      (flatten ["loop" (:label component) "\n"
-                                                (mapv assemble (:following-forms component))
-                                                ["\nend"]])))
-                (= "note-left" component-subtype)
-                (apply str (interpose " "
-                                      ["Note left of"
-                                       (:actor component) ":"
-                                       (:note component)]))
-                (= "note-right" component-subtype)
+                (apply str (interpose " " (flatten ["participant" (:actors component)])))
+                (= "activate" component-subtype)
+                (str "activate " (:actor component))
+                (= "deactivate" component-subtype)
+                (str "deactivate " (:actor component)))
+          (= "solid" component-type)
+          (cond (= "line" component-subtype)
+                ()
+                (= "arrow" component-subtype)
+                ()
+                (= "cross" component-subtype)
+                ()
+                (= "open" component-subtype)
+                ())
+          (= "dotted" component-type)
+          (cond (= "line" component-subtype)
+                ()
+                (= "arrow" component-subtype)
+                ()
+                (= "cross" component-subtype)
+                ()
+                (= "open" component-subtype)
+                ())
+          (= "note" component-type)
+          (cond (= "left" component-subtype)
+                (apply str (interpose " " ["Note left of"
+                                           (:actor component) ":"
+                                           (:note component)]))
+                (= "right" component-subtype)
                 (apply str (interpose " "
                                       ["Note right of"
                                        (:actor component) ":"
                                        (:note component)]))
-                (= "note-over" component-subtype)
+                (= "over" component-subtype)
                 (apply str (interpose " "
                                       ["Note over"
                                        (:actor1 component)
                                        (when (:actor2 component)
                                          "," (:actor2 component)) ":"
-                                       (:note component)]))
+                                       (:note component)])))
+          (= "block" component-type)
+          (cond (= "loop" component-subtype)
+                (apply str (interpose " " (flatten ["loop" (:label component) "\n"
+                                                    (mapv assemble (:following-forms component))
+                                                    ["\nend"]])))
                 (= "highlight" component-subtype)
                 (apply str (interpose " "
                                       (flatten ["rect" (:color component) "\n"
@@ -285,23 +307,4 @@
                 (= "parallel" component-subtype)
                 ()
                 (= "optional" component-subtype)
-                ())
-          (= "call" component-type)
-          (cond (= "sync" component-subtype)
-                ()
-                (= "activate" component-subtype)
-                ()
-                (= "cross" component-subtype)
-                ()
-                (= "async" component-subtype)
-                ())
-          (= "reply" component-type)
-          (cond
-            (= "sync" component-subtype)
-            ()
-            (= "activate" component-subtype)
-            ()
-            (= "cross" component-subtype)
-            ()
-            (= "async" component-subtype)
-            ()))))
+                ()))))

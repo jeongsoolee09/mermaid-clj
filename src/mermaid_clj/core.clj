@@ -230,8 +230,6 @@
        (:body (client/get url {:as :stream}))
        (File. destination)))))
 
-(def request synchronous)
-(def produce async)
 
 (comment
   (def sample
