@@ -1,5 +1,6 @@
 (ns mermaid-clj.sequence
-  (:require [clojure.core.match :refer [match]]))
+  (:require [clojure.core.match :refer [match]]
+            [clojure.string :as string]))
 
 (defmacro use-like-this [& _])
 
@@ -11,23 +12,27 @@
         (= (name color) :gray)   "rgb(0,0,0,0.1)"
         :else                    "rgb(0,0,0,0)")) ; fall back to black
 
-(defn arrow [type1 type2 activate deactivate]
-  (match [(name type1) (name type2)]
-    ["solid" "line"] (append-activate "->" activate deactivate)
-    ["solid" "arrow"] (append-activate "->>" activate deactivate)
-    ["solid" "cross"] (append-activate "-x" activate deactivate)
-    ["solid" "open"] (append-activate "-)" activate deactivate)
-    ["dotted" "line"] (append-activate "-->" activate deactivate)
-    ["dotted" "arrow"] (append-activate "-->>" activate deactivate)
-    ["dotted" "cross"] (append-activate "--x" activate deactivate)
-    ["dotted" "open"] (append-activate "--)" activate deactivate)))
-
 (defn append-activate [arrow-str activate deactivate]
   (match [activate deactivate]
     [false false] arrow-str
     [true false] (str arrow-str "+")
     [false true] (str arrow-str "-")
-    [true true] (throw IllegalArgumentException.)))
+    [true true] (throw (IllegalArgumentException.))))
+
+(defn arrow->str [arrow]
+  (let [type1      (namespace (arrow :type))
+        type2      (name (arrow :type))
+        activate   (arrow :activate)
+        deactivate (arrow :deactivate)]
+    (match [(name type1) (name type2)]
+      ["solid" "line"] (append-activate "->" activate deactivate)
+      ["solid" "arrow"] (append-activate "->>" activate deactivate)
+      ["solid" "cross"] (append-activate "-x" activate deactivate)
+      ["solid" "open"] (append-activate "-)" activate deactivate)
+      ["dotted" "line"] (append-activate "-->" activate deactivate)
+      ["dotted" "arrow"] (append-activate "-->>" activate deactivate)
+      ["dotted" "cross"] (append-activate "--x" activate deactivate)
+      ["dotted" "open"] (append-activate "--)" activate deactivate))))
 
 ;; ============ DSL APIs ============
 
