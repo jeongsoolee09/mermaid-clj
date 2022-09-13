@@ -2,9 +2,7 @@
   (:require [clojure.data.json :as json]
             [clojure.java.shell :as shell]
             [clj-http.client :as client]
-            [clojure.string :as string])
-  (:import java.util.Base64
-           [java.io File]))
+            [clojure.string :as string]))
 
 (defmacro use-like-this [& _])
 
@@ -41,95 +39,125 @@
 
 ;; ============ arrows ============
 
-(defn call-sync
-  "Make a synchronous call from an actor to another."
-  [actor-from actor-to message]
+(defn solid-line
+  "Solid line without arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (call-sync :alice :bob "hihi")
-    (call-sync 'bob 'alice "hoho"))
-  {:type    :call/sync
+    (solid-line :alice :bob "hihi")
+    (solid-line 'bob 'alice "hoho"))
+  {:type       :solid/line
+   :from       actor-from
+   :to         actor-to
+   :message    message
+   :activate   activate
+   :deactivate deactivate})
+
+(defn solid-arrow
+  "Solid line with arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
+  (use-like-this "all data can be a symbol, keyword, or a string."
+    (solid-arrow :alice :bob "hihi")
+    (solid-arrow 'bob 'alice "hoho"))
+  {:type    :solid/arrow
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-(defn call-activate
-  "Make a call from an actor to another and activate the receiver."
-  [actor-from actor-to message]
+(defn solid-cross
+  "Solid line with cross arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (call-activate :alice :bob "hihi")
-    (call-activate 'bob 'alice "hoho"))
-  {:type    :call/activate
+    (solid-cross :alice :bob "hihi")
+    (solid-cross 'bob 'alice "hoho"))
+  {:type    :solid/cross
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-(defn call-cross
-  "Make a call from an actor to another with a cross-shaped arrow."
-  [actor-from actor-to message]
+(defn solid-open
+  "Solid line with open arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (call-cross :alice :bob "hihi")
-    (call-cross 'bob 'alice "hoho"))
-  {:type    :call/cross
+    (solid-open :alice :bob "hihi")
+    (solid-open 'bob 'alice "hoho"))
+  {:type    :solid/open
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-(defn call-async
-  "Make an asynchronous call from an actor to another with a cross-shaped arrow."
-  [actor-from actor-to message]
+(defn dotted-line
+  "Dotted line without arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (call-async :alice :bob "hihi")
-    (call-async 'bob 'alice "hoho"))
-  {:type    :call/async
+    (dotted-line :alice :bob "hihi")
+    (dotted-line 'bob 'alice "hoho"))
+  {:type    :dotted/line
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-;; ============ replys ============
-
-(defn reply-sync
-  "Make a synchronous reply from an actor to another."
-  [actor-from actor-to message]
+(defn dotted-arrow
+  "Dotted line with arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (reply-sync :alice :bob "hihi")
-    (reply-sync 'bob 'alice "hoho"))
-  {:type    :reply/sync
+    (dotted-arrow :alice :bob "hihi")
+    (dotted-arrow 'bob 'alice "hoho"))
+  {:type    :dotted/arrow
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-(defn reply-activate
-  "Make a reply from an actor to another and terminate the activation."
-  [actor-from actor-to message]
+(defn dotted-cross
+  "Dotted line with cross arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (reply-activate :alice :bob "hihi")
-    (reply-activate 'bob 'alice "hoho"))
-  {:type    :reply/activate
+    (dotted-cross :alice :bob "hihi")
+    (dotted-cross 'bob 'alice "hoho"))
+  {:type    :dotted/cross
    :from    actor-from
    :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
-(defn reply-cross
-  "Make a reply from an actor to another with a cross-shaped arrow."
-  [actor-from actor-to message]
+(defn dotted-open
+  "Dotted line with open arrowhead from an actor to another."
+  [actor-from actor-to message & {:keys [activate deactivate]
+                                  :or   {activate   false
+                                         deactivate false}}]
   (use-like-this "all data can be a symbol, keyword, or a string."
-    (reply-cross :alice :bob "hihi")
-    (reply-cross 'bob 'alice "hoho"))
-  {:type    :reply/async
+    (dotted-open :alice :bob "hihi")
+    (dotted-open 'bob 'alice "hoho"))
+  {:type    :dotted/open
    :from    actor-from
    :to      actor-to
-   :message message})
-
-(defn reply-async
-  "Make an asynchronous reply from an actor to another."
-  [actor-from actor-to message]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (reply-async :alice :bob "hihi")
-    (reply-async 'bob 'alice "hoho"))
-  {:type    :call/async
-   :from    actor-from
-   :to      actor-to
-   :message message})
+   :message message
+   :activate   activate
+   :deactivate deactivate})
 
 ;;; ============ back and forth ============
 
@@ -310,45 +338,3 @@
             ()
             (= "async" component-subtype)
             ()))))
-
-(defn encode-base64
-  "Encode the given string into UTF-8."
-  [string]
-  (.encodeToString (Base64/getEncoder) (.getBytes string "UTF-8")))
-
-(defn browser-view
-  [diagram]
-  (let [current-env (into {} (System/getenv))]
-    (shell/sh "xdg-open"
-              (format mermaid-view
-                      (encode-base64
-                        (json/write-str
-                          {:code         diagram
-                           :mermaid      {:theme "default"}
-                           :updateEditor false})))
-              :env (assoc current-env "BROWSER" "firefox"))))
-
-(defn browser-edit
-  [diagram]
-  (let [current-env (into {} (System/getenv))]
-    (shell/sh "xdg-open"
-              (format mermaid-edit
-                      (encode-base64
-                        (json/write-str
-                          {:code         diagram
-                           :mermaid      {:theme "default"}
-                           :updateEditor false})))
-              :env (assoc current-env "BROWSER" "firefox"))))
-
-(defn download-image
-  ([diagram]
-   (download-image diagram "/tmp/output.png"))
-  ([diagram destination]
-   (let [url (format mermaid-img
-                     (encode-base64
-                       (json/write-str
-                         {:code    diagram
-                          :mermaid {:theme "default"}})))]
-     (clojure.java.io/copy
-       (:body (client/get url {:as :stream}))
-       (File. destination)))))
