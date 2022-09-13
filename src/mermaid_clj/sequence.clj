@@ -1,8 +1,5 @@
 (ns mermaid-clj.sequence
-  (:require [clojure.data.json :as json]
-            [clojure.java.shell :as shell]
-            [clj-http.client :as client]
-            [clojure.string :as string]))
+  (:require [clojure.core.match :refer [match]]))
 
 (defmacro use-like-this [& _])
 
@@ -14,7 +11,23 @@
         (= (name color) :gray)   "rgb(0,0,0,0.1)"
         :else                    "rgb(0,0,0,0)")) ; fall back to black
 
+(defn arrow [type1 type2 activate deactivate]
+  (match [(name type1) (name type2)]
+    ["solid" "line"] (append-activate "->" activate deactivate)
+    ["solid" "arrow"] (append-activate "->>" activate deactivate)
+    ["solid" "cross"] (append-activate "-x" activate deactivate)
+    ["solid" "open"] (append-activate "-)" activate deactivate)
+    ["dotted" "line"] (append-activate "-->" activate deactivate)
+    ["dotted" "arrow"] (append-activate "-->>" activate deactivate)
+    ["dotted" "cross"] (append-activate "--x" activate deactivate)
+    ["dotted" "open"] (append-activate "--)" activate deactivate)))
 
+(defn append-activate [arrow-str activate deactivate]
+  (match [activate deactivate]
+    [false false] arrow-str
+    [true false] (str arrow-str "+")
+    [false true] (str arrow-str "-")
+    [true true] (throw IllegalArgumentException.)))
 
 ;; ============ DSL APIs ============
 
