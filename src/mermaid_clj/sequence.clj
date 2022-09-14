@@ -281,73 +281,68 @@
 (defn block? [component]
   (= "block" (namespace (:type component))))
 
-;; ============ renderers ============
-
-(defn render-label [label]
-  (let [label-type (name (label :type))]
-    (cond (= "autonumber" label-type)
-          "autonumber"
-          (= "participants" label-type)
-          (apply str (interpose " " (flatten ["participant" (:actors label)])))
-          (= "activate" label-type)
-          (str "activate " (:actor label))
-          (= "deactivate" label-type)
-          (str "deactivate " (:actor label)))))
-
-(defn render-arrow [arrow])
-
-(defn render-note [note]
-  (let [note-type (name (note :type))]
-    (cond (= "left" note-type)
-          (apply str (interpose " " ["Note left of"
-                                     (:actor note) ":"
-                                     (:note note)]))
-          (= "right" note-type)
-          (apply str (interpose " "
-                                ["Note right of"
-                                 (:actor note) ":"
-                                 (:note note)]))
-          (= "over" note-type)
-          (apply str (interpose " "
-                                ["Note over"
-                                 (:actor1 note)
-                                 (when (:actor2 note)
-                                   "," (:actor2 note)) ":"
-                                 (:note note)])))))
-
-(defn render-block [block]
-  ;;; TODO
-  (let [block-type (name (block :type))]
-    (cond (= "loop" block-type)
-          (apply str (interpose " " (flatten ["loop" (:label block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              ["\nend"]])))
-          (= "highlight" block-type)
-          (apply str (interpose " " (flatten ["rect" (:color block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              "\nend"])))
-          (= "alternative" block-type)
-          (apply str (interpose " " (flatten ["alt" (:condition block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              "\nend"])))
-          (= "parallel" block-type)
-          (apply str (interpose " " (flatten ["par" (:condition block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              "\nend"])))
-          (= "optional" block-type)
-          (apply str (interpose " " (flatten ["opt" (:condition block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              "\nend"])))
-          (= "sequence-diagram" block-type)
-          (apply str (interpose " " (flatten ["opt" (:condition block) "\n"
-                                              (mapv assemble (:following-forms block))
-                                              "\nend"]))))))
-
-(defn dispatch-renderer [component]
-  (cond (label? component) render-label
-        (arrow? component) render-arrow
-        (note? component)  render-note
-        (block? component) render-block))
+;; ============ render ============
 
 (defn render [component]
-  ((dispatch-renderer component) component))
+  (letfn [(render-label [[label]]
+            (let [label-type (name (label :type))]
+              (cond (= "autonumber" label-type)
+                    "autonumber"
+                    (= "participants" label-type)
+                    (apply str (interpose " " (flatten ["participant" (:actors label)])))
+                    (= "activate" label-type)
+                    (str "activate " (:actor label))
+                    (= "deactivate" label-type)
+                    (str "deactivate " (:actor label)))))
+          (render-arrow [[arrow]])
+          (render-note [[note]]
+            (let [note-type (name (note :type))]
+              (cond (= "left" note-type)
+                    (apply str (interpose " " ["Note left of"
+                                               (:actor note) ":"
+                                               (:note note)]))
+                    (= "right" note-type)
+                    (apply str (interpose " "
+                                          ["Note right of"
+                                           (:actor note) ":"
+                                           (:note note)]))
+                    (= "over" note-type)
+                    (apply str (interpose " "
+                                          ["Note over"
+                                           (:actor1 note)
+                                           (when (:actor2 note)
+                                             "," (:actor2 note)) ":"
+                                           (:note note)])))))
+          (render-block [[block]]
+            ;; TODO
+            (let [block-type (name (block :type))]
+              (cond (= "loop" block-type)
+                    (apply str (interpose " " (flatten ["loop" (:label block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        ["\nend"]])))
+                    (= "highlight" block-type)
+                    (apply str (interpose " " (flatten ["rect" (:color block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        "\nend"])))
+                    (= "alternative" block-type)
+                    (apply str (interpose " " (flatten ["alt" (:condition block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        "\nend"])))
+                    (= "parallel" block-type)
+                    (apply str (interpose " " (flatten ["par" (:condition block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        "\nend"])))
+                    (= "optional" block-type)
+                    (apply str (interpose " " (flatten ["opt" (:condition block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        "\nend"])))
+                    (= "sequence-diagram" block-type)
+                    (apply str (interpose " " (flatten ["sequenceDiagram" (:condition block) "\n    "
+                                                        (mapv render (:following-forms block))
+                                                        "\nend"]))))))
+          (dispatch-renderer [[component]]
+            (cond (label? component) render-label
+                  (arrow? component) render-arrow
+                  (note? component)  render-note
+                  (block? component) render-block))]
+    (trampoline (dispatch-renderer component) component))
