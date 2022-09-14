@@ -334,15 +334,15 @@
 
 (defn render-complex-block [indent-level complex-block block-name clause-name]
   (if (>= 0 (count (:following-forms complex-block))) (throw (IllegalArgumentException.))
-      (letfn [(alt-first [indent-level complex-block]
-                (let [alt-clause (first (:following-forms complex-block))
+      (letfn [(handle-first [indent-level complex-block]
+                (let [first-clause (first (:following-forms complex-block))
                       indent     (make-indent indent-level)]
                   (string/join
-                    (flatten [indent block-name " " (first alt-clause) "\n"
+                    (flatten [indent block-name " " (first first-clause) "\n"
                               (interpose "\n" (mapv (partial render-with-indent
                                                              (+ indent-level 4))
-                                                    (second alt-clause)))]))))
-              (alt-rest [indent-level complex-block]
+                                                    (second first-clause)))]))))
+              (handle-rest [indent-level complex-block]
                 (loop [current-clauses (rest (:following-forms complex-block))
                        acc             ""]
                   (if (empty? current-clauses) acc
@@ -355,8 +355,8 @@
                                                                                (second current-clause))))
                             clause-rendered      (str indent clause-name " " condition "\n" clause-form-rendered)]
                         (recur (rest current-clauses) (str acc clause-rendered "\n"))))))]
-        (str (alt-first indent-level complex-block) "\n"
-             (alt-rest indent-level complex-block) ; don't need a newline
+        (str (handle-first indent-level complex-block) "\n"
+             (handle-rest indent-level complex-block) ; don't need a newline
              (make-indent indent-level) "end"))))
 
 (defn render-block [indent-level block]
@@ -386,6 +386,7 @@
 
 (comment "========================================"
   (println (sequence-diagram
+             (autonumber)
              (loop- "until dead"
                     (solid-arrow :alice :bob "hihi")
                     (solid-arrow :bob :alice "hoho")
