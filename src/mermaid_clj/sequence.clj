@@ -250,11 +250,9 @@
 
 (defn parallel
   "Parallel block with a description."
-  [description forms & others]
+  [& condition-and-forms]
   {:type            :block/par
-   :label           description
-   :following-forms forms
-   :others          others})
+   :following-forms condition-and-forms})
 
 (defn optional
   "Optional block with a description."
@@ -281,8 +279,9 @@
 ;; ============ render ============
 
 (declare dispatch-renderer)
+(declare render-with-indent)
 
-(defn render-label [label indent-level]
+(defn render-label [indent-level label]
   (let [label-type (name (label :type))
         indent     (make-indent indent-level)]
     (cond (= "autonumber" label-type)   (str indent "autonumber")
@@ -293,15 +292,15 @@
           (= "activate" label-type)     (str indent "activate " (:actor label))
           (= "deactivate" label-type)   (str indent "deactivate " (:actor label)))))
 
-(defn render-arrow [arrow indent-level]
+(defn render-arrow [indent-level arrow]
   (let [from      (name (:from arrow))
-        to        (name (:from arrow))
+        to        (name (:to arrow))
         message   (:message arrow)
         arrow-str (arrow->str arrow)
-        indent    (make-indent indent-level)])
-  (str indent from arrow->str to ": " message))
+        indent    (make-indent indent-level)]
+    (str indent from arrow-str to ": " message)))
 
-(defn render-note [note indent-level]
+(defn render-note [indent-level note]
   (let [note-type (name (note :type))
         indent    (make-indent indent-level)]
     (cond (= "left" note-type)
@@ -319,35 +318,53 @@
                                              (:actor1 note)
                                              (when (:actor2 note)
                                                (str "," (:actor2 note))) ":"
-                                             (:note note)]))))))a
+                                             (:note note)]))))))
 
-(defn render-simple-block [simple-block indent-level]
-  ;; NOTE deals with loop, rect, alt, and opt
+(defn render-simple-block [indent-level simple-block]
   (let [block-name (name (simple-block :type))
         indent     (make-indent indent-level)]
     (str indent
          (apply str
                 (interpose " "
                            (flatten [block-name (:label simple-block) "\n    "
-                                     (mapv render (:following-forms simple-block))
+                                     (mapv (render-with-indent (+ indent-level 4))
+                                           (:following-forms simple-block))
                                      ["\nend"]]))))))
 
-(defn render-complex-block [complex-block indent-level]
-  ;; NOTE deals with alternative, parallel
-  )
+(defn render-complex-block [indent-level complex-block block-name clause-name]
+  (if (>= 0 alt-form-nums) (throw (IllegalArgumentException.))
+      (letfn [(alt-first [indent-level complex-block]
+                (let [alt-clause (first (:following-forms complex-block))]
+                  (string/join
+                    (flatten [block-name " " (first alt-clause) "\n"
+                              (interpose "\n" (mapv (partial render-with-indent
+                                                             (+ indent-level 4))
+                                                    (second alt-clause)))]))))
+              (alt-rest [indent-level complex-block]
+                (loop [current-clauses (rest (:following-forms complex-block))
+                       acc             ""]
+                  (if (empty? current-clauses) acc
+                      (let [current-clause       (first current-clauses)
+                            condition            (first current-clause)
+                            clause-form-rendered (string/join (interpose "\n"
+                                                                         (mapv (partial render-with-indent
+                                                                                        (+ indent-level 4))
+                                                                               (second current-clause))))
+                            clause-rendered      (str clause-name " " condition "\n" clause-form-rendered)]
+                        (recur (rest current-clauses) (str acc clause-rendered "\n"))))))]
+        (str (alt-first indent-level complex-block) "\n" (alt-rest indent-level complex-block)))))
 
-(defn render-block [block indent-level]
+(defn render-block [indent-level block]
   (let [block-type (name (block :type))]
     (cond (or (= "loop" block-type)
-              (= "highlight" block-type)
-              (= "optional" block-type)) (render-simple-block block indent-level)
-          (or (= "alternative" block-type)
-              (= "parallel" block-type)) (render-complex-block block indent-level))))
+              (= "rect" block-type)
+              (= "opt" block-type)) (render-simple-block indent-level block)
+          (= "alt" block-type)      (render-complex-block indent-level block "alt" "else")
+          (= "par" block-type)      (render-complex-block indent-level block "par" "and"))))
 
 
-(defn render-with-indent [component indent]
-  (trampoline (partial (dispatch-renderer component) indent) component))
-
+(defn render-with-indent [indent-level component]
+  (trampoline (partial (dispatch-renderer component) indent-level) component))
 
 (defn render [component]
   (render-with-indent component 0))
@@ -357,21 +374,4 @@
   [& forms])
 
 (comment "========================================"
-  (def alt (alternative
-             ["x=1" [(solid-arrow :a :b "hoho")
-                     (dotted-arrow :b :a "hihi")]]
-             ["x=2" [(solid-arrow :a :b "hoho")
-                     (dotted-arrow :b :a "hihi")]]
-             ["x=3" [(solid-arrow :a :b "hoho")
-                     (dotted-arrow :b :a "hihi")]]))
-
-  (def alt-form-nums (count (:following-forms alt)))
-  (def alt-forms (:following-forms alt))
-
-  (cond (>= 0 alt-form-nums) (throw (IllegalArgumentException.))
-        (= 1 alt-form-nums)  'todo1
-        :else                'todo2)
-
-  (apply str (interpose " " (flatten ["alt" (first (first alt-forms))
-                                      "\n    "
-                                      (interleave "\n    " (mapv render (second (first alt-forms))))]))))
+  )
