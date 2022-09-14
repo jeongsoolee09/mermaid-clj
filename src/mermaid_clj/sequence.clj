@@ -327,14 +327,13 @@
         indent     (make-indent indent-level)]
     (str indent
          (string/join
-           (interpose " "
-                      (flatten [block-name (:label simple-block) "\n    "
-                                (mapv (render-with-indent (+ indent-level 4))
-                                      (:following-forms simple-block))
-                                ["\nend"]]))))))
+           (flatten [block-name " " (:label simple-block) "\n"
+                     (interpose "\n" (mapv (partial render-with-indent (+ indent-level 4))
+                                           (:following-forms simple-block)))
+                     ["\nend"]])))))
 
 (defn render-complex-block [indent-level complex-block block-name clause-name]
-  (if (>= 0 alt-form-nums) (throw (IllegalArgumentException.))
+  (if (>= 0 (count (:following-forms complex-block))) (throw (IllegalArgumentException.))
       (letfn [(alt-first [indent-level complex-block]
                 (let [alt-clause (first (:following-forms complex-block))]
                   (string/join
@@ -364,16 +363,32 @@
           (= "alt" block-type)      (render-complex-block indent-level block "alt" "else")
           (= "par" block-type)      (render-complex-block indent-level block "par" "and"))))
 
+(defn dispatch-renderer [component]
+  (cond (label? component) render-label
+        (arrow? component) render-arrow
+        (note? component)  render-note
+        (block? component) render-block))
 
 (defn render-with-indent [indent-level component]
   (trampoline (partial (dispatch-renderer component) indent-level) component))
 
 (defn render [component]
-  (render-with-indent component 0))
+  (render-with-indent 0 component))
 
 (defn sequence-diagram
   "Make a Sequence Diagram."
-  [& forms])
+  [& forms]
+  'TODO)
 
 (comment "========================================"
-  )
+  (println (render (loop- "hihi"
+                          (solid-arrow :alice :bob "hihi")
+                          (solid-arrow 'bob 'alice "hoho"))))
+
+  (println (render (optional "hihi"
+                             (solid-arrow :alice :bob "hihi")
+                             (solid-arrow 'bob 'alice "hoho"))))
+
+  (println (render (highlight :green
+                              (solid-arrow :alice :bob "hihi")
+                              (solid-arrow 'bob 'alice "hoho")))))
