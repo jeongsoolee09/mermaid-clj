@@ -283,80 +283,154 @@
 
 ;; ============ render ============
 
+(declare dispatch-renderer)
+
+(defn render-label [label]
+  (let [label-type (name (label :type))]
+    (cond (= "autonumber" label-type)
+          "autonumber"
+          (= "participants" label-type)
+          (apply str (interpose " " (flatten ["participant" (:actors label)])))
+          (= "activate" label-type)
+          (str "activate " (:actor label))
+          (= "deactivate" label-type)
+          (str "deactivate " (:actor label)))))
+
+(defn render-arrow [arrow]
+  (str (name (:from arrow)) (arrow->str arrow) (name (:to arrow)) ": " (:message arrow)))
+
+(defn render-note [note]
+  (let [note-type (name (note :type))]
+    (cond (= "left" note-type)
+          (apply str (interpose " " ["Note left of"
+                                     (:actor note) ":"
+                                     (:note note)]))
+          (= "right" note-type)
+          (apply str (interpose " "
+                                ["Note right of"
+                                 (:actor note) ":"
+                                 (:note note)]))
+          (= "over" note-type)
+          (apply str (interpose " "
+                                ["Note over"
+                                 (:actor1 note)
+                                 (when (:actor2 note)
+                                   (str "," (:actor2 note))) ":"
+                                 (:note note)])))))
+
+(defn render-block [block]
+  ;; TODO
+  (let [block-type (name (block :type))]
+    (cond (= "loop" block-type)
+          (apply str (interpose " " (flatten ["loop" (:label block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              ["\nend"]])))
+          (= "highlight" block-type)
+          (apply str (interpose " " (flatten ["rect" (:color block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              "\nend"])))
+          (= "alternative" block-type)
+          (apply str (interpose " " (flatten ["alt" (:condition block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              "\nend"])))
+          (= "parallel" block-type)
+          (apply str (interpose " " (flatten ["par" (:condition block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              "\nend"])))
+          (= "optional" block-type)
+          (apply str (interpose " " (flatten ["opt" (:condition block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              "\nend"])))
+          (= "sequence-diagram" block-type)
+          (apply str (interpose " " (flatten ["sequenceDiagram" (:condition block) "\n    "
+                                              (mapv (fn [component]
+                                                      ((dispatch-renderer component) component))
+                                                    (:following-forms block))
+                                              "\nend"]))))))
+
 (defn render [component]
-  (letfn [(render-label [[label]]
-            (let [label-type (name (label :type))]
-              (cond (= "autonumber" label-type)
-                    "autonumber"
-                    (= "participants" label-type)
-                    (apply str (interpose " " (flatten ["participant" (:actors label)])))
-                    (= "activate" label-type)
-                    (str "activate " (:actor label))
-                    (= "deactivate" label-type)
-                    (str "deactivate " (:actor label)))))
-          (render-arrow [[arrow]]
-            ;; TODO
-            )
-          (render-note [[note]]
-            (let [note-type (name (note :type))]
-              (cond (= "left" note-type)
-                    (apply str (interpose " " ["Note left of"
-                                               (:actor note) ":"
-                                               (:note note)]))
-                    (= "right" note-type)
-                    (apply str (interpose " "
-                                          ["Note right of"
-                                           (:actor note) ":"
-                                           (:note note)]))
-                    (= "over" note-type)
-                    (apply str (interpose " "
-                                          ["Note over"
-                                           (:actor1 note)
-                                           (when (:actor2 note)
-                                             "," (:actor2 note)) ":"
-                                           (:note note)])))))
-          (render-block [[block]]
-            ;; TODO
-            (let [block-type (name (block :type))]
-              (cond (= "loop" block-type)
-                    (apply str (interpose " " (flatten ["loop" (:label block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        ["\nend"]])))
-                    (= "highlight" block-type)
-                    (apply str (interpose " " (flatten ["rect" (:color block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        "\nend"])))
-                    (= "alternative" block-type)
-                    (apply str (interpose " " (flatten ["alt" (:condition block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        "\nend"])))
-                    (= "parallel" block-type)
-                    (apply str (interpose " " (flatten ["par" (:condition block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        "\nend"])))
-                    (= "optional" block-type)
-                    (apply str (interpose " " (flatten ["opt" (:condition block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        "\nend"])))
-                    (= "sequence-diagram" block-type)
-                    (apply str (interpose " " (flatten ["sequenceDiagram" (:condition block) "\n    "
-                                                        (mapv (fn [component]
-                                                                ((dispatch-renderer component) component))
-                                                              (:following-forms block))
-                                                        "\nend"]))))))
-          (dispatch-renderer [[component]]
-            (cond (label? component) render-label
-                  (arrow? component) render-arrow
-                  (note? component)  render-note
-                  (block? component) render-block))]
-    (trampoline (dispatch-renderer component) component)))
+  (trampoline (dispatch-renderer component) component))
+
+
+(comment
+  (solid-line 'alice 'bob "hoihoi" :activate true)
+  (solid-arrow 'alice 'bob "hoihoi" :activate true)
+  (solid-cross 'alice 'bob "hoihoi" :activate true)
+  (solid-open 'alice 'bob "hoihoi" :activate true)
+
+  (arrow->str (dotted-line 'alice 'bob "hoihoi" :activate true))
+  (arrow->str (dotted-arrow 'alice 'bob "hoihoi" :activate true))
+  (arrow->str (dotted-cross 'alice 'bob "hoihoi" :activate true))
+  (arrow->str (dotted-open 'alice 'bob "hoihoi" :activate true))
+
+  (def line (solid-line 'alice 'bob "hoihoi" :activate true))
+
+  (keys line)
+
+  (:from line)
+  (:to line)
+  (:message line)
+
+  (defn render-arrow [arrow]
+    (str (name (:from arrow)) (arrow->str arrow) (name (:to arrow)) ": " (:message arrow)))
+
+  (render-arrow (dotted-line 'alice 'bob "hoihoi" :activate true))
+  (render-arrow (dotted-arrow 'alice 'bob "hoihoi" :activate true))
+  (render-arrow (dotted-cross 'alice 'bob "hoihoi" :deactivate true))
+  (render-arrow (dotted-open 'alice 'bob "hoihoi" :activate true))
+
+  (defn f [x])
+  (defn g [x y z])
+
+  (defn test [input]
+    (cond (even? input) f
+          (odd? input)  g))
+
+  (test 0)
+  (test 1)
+
+  (def alt (alternative
+             ["x=1" [(solid-arrow :a :b "hoho")
+                     (dotted-arrow :b :a "hihi")]]
+             ["x=2" [(solid-arrow :a :b "hoho")
+                     (dotted-arrow :b :a "hihi")]]
+             ["x=3" [(solid-arrow :a :b "hoho")
+                     (dotted-arrow :b :a "hihi")]]))
+
+  (def clause1 (first user/clause1))
+  (def clause2 (second user/clause1))
+  (def clause3 (nth user/clause1 2))
+
+  (str (first clause1)
+       (second clause1))
+
+  (def arrows [(solid-arrow :a :b "hoho")
+               (dotted-arrow :b :a "hihi")])
+
+  (def forms [(solid-arrow :a :b "hoho")
+              (highlight :green
+                         (solid-arrow :a :b "hoho")
+                         (dotted-arrow :b :a "hihi"))
+              (dotted-arrow :b :a "hihi")])
+
+  (defn dispatch-renderer [component]
+    (cond (label? component) render-label
+          (arrow? component) render-arrow
+          (note? component)  render-note
+          (block? component) render-block))
+
+  (mapv render arrows)
+  (mapv render forms)
+
+  (map render forms))
+
