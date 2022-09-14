@@ -286,9 +286,10 @@
         indent     (make-indent indent-level)]
     (cond (= "autonumber" label-type)   (str indent "autonumber")
           (= "participants" label-type) (str indent
-                                             (apply str (interpose " "
-                                                                   (flatten
-                                                                     ["participant" (:actors label)]))))
+                                             (string/join
+                                               (interpose " "
+                                                          (flatten
+                                                            ["participant" (:actors label)]))))
           (= "activate" label-type)     (str indent "activate " (:actor label))
           (= "deactivate" label-type)   (str indent "deactivate " (:actor label)))))
 
@@ -304,32 +305,33 @@
   (let [note-type (name (note :type))
         indent    (make-indent indent-level)]
     (cond (= "left" note-type)
-          (str indent (apply str (interpose " " ["Note left of"
-                                                 (:actor note) ":"
-                                                 (:note note)])))
+          (str indent (string/join
+                        (interpose " " ["Note left of"
+                                        (:actor note) ":"
+                                        (:note note)])))
           (= "right" note-type)
-          (str indent (apply str (interpose " "
-                                            ["Note right of"
-                                             (:actor note) ":"
-                                             (:note note)])))
+          (str indent (string/join
+                        (interpose " " ["Note right of"
+                                        (:actor note) ":"
+                                        (:note note)])))
           (= "over" note-type)
-          (str indent (apply str (interpose " "
-                                            ["Note over"
-                                             (:actor1 note)
-                                             (when (:actor2 note)
-                                               (str "," (:actor2 note))) ":"
-                                             (:note note)]))))))
+          (str indent (string/join
+                        (interpose " " ["Note over"
+                                        (:actor1 note)
+                                        (when (:actor2 note)
+                                          (str "," (:actor2 note))) ":"
+                                        (:note note)]))))))
 
 (defn render-simple-block [indent-level simple-block]
   (let [block-name (name (simple-block :type))
         indent     (make-indent indent-level)]
     (str indent
-         (apply str
-                (interpose " "
-                           (flatten [block-name (:label simple-block) "\n    "
-                                     (mapv (render-with-indent (+ indent-level 4))
-                                           (:following-forms simple-block))
-                                     ["\nend"]]))))))
+         (string/join
+           (interpose " "
+                      (flatten [block-name (:label simple-block) "\n    "
+                                (mapv (render-with-indent (+ indent-level 4))
+                                      (:following-forms simple-block))
+                                ["\nend"]]))))))
 
 (defn render-complex-block [indent-level complex-block block-name clause-name]
   (if (>= 0 alt-form-nums) (throw (IllegalArgumentException.))
