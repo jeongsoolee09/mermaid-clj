@@ -217,7 +217,7 @@
 
 ;;; ============ Blocks ============
 
-(defn loop
+(defn loop-
   "Loop block with a label."
   [label & forms]
   {:type            :block/loop
@@ -294,7 +294,9 @@
                     (str "activate " (:actor label))
                     (= "deactivate" label-type)
                     (str "deactivate " (:actor label)))))
-          (render-arrow [[arrow]])
+          (render-arrow [[arrow]]
+            ;; TODO
+            )
           (render-note [[note]]
             (let [note-type (name (note :type))]
               (cond (= "left" note-type)
@@ -318,31 +320,43 @@
             (let [block-type (name (block :type))]
               (cond (= "loop" block-type)
                     (apply str (interpose " " (flatten ["loop" (:label block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         ["\nend"]])))
                     (= "highlight" block-type)
                     (apply str (interpose " " (flatten ["rect" (:color block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         "\nend"])))
                     (= "alternative" block-type)
                     (apply str (interpose " " (flatten ["alt" (:condition block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         "\nend"])))
                     (= "parallel" block-type)
                     (apply str (interpose " " (flatten ["par" (:condition block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         "\nend"])))
                     (= "optional" block-type)
                     (apply str (interpose " " (flatten ["opt" (:condition block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         "\nend"])))
                     (= "sequence-diagram" block-type)
                     (apply str (interpose " " (flatten ["sequenceDiagram" (:condition block) "\n    "
-                                                        (mapv render (:following-forms block))
+                                                        (mapv (fn [component]
+                                                                ((dispatch-renderer component) component))
+                                                              (:following-forms block))
                                                         "\nend"]))))))
           (dispatch-renderer [[component]]
             (cond (label? component) render-label
                   (arrow? component) render-arrow
                   (note? component)  render-note
                   (block? component) render-block))]
-    (trampoline (dispatch-renderer component) component))
+    (trampoline (dispatch-renderer component) component)))
