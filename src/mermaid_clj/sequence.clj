@@ -329,15 +329,16 @@
          (string/join
            (flatten [block-name " " (:label simple-block) "\n"
                      (interpose "\n" (mapv (partial render-with-indent (+ indent-level 4))
-                                           (:following-forms simple-block)))
-                     ["\nend"]])))))
+                                           (:following-forms simple-block)))]))
+         "\n" indent "end")))
 
 (defn render-complex-block [indent-level complex-block block-name clause-name]
   (if (>= 0 (count (:following-forms complex-block))) (throw (IllegalArgumentException.))
       (letfn [(alt-first [indent-level complex-block]
-                (let [alt-clause (first (:following-forms complex-block))]
+                (let [alt-clause (first (:following-forms complex-block))
+                      indent     (make-indent indent-level)]
                   (string/join
-                    (flatten [block-name " " (first alt-clause) "\n"
+                    (flatten [indent block-name " " (first alt-clause) "\n"
                               (interpose "\n" (mapv (partial render-with-indent
                                                              (+ indent-level 4))
                                                     (second alt-clause)))]))))
@@ -345,15 +346,18 @@
                 (loop [current-clauses (rest (:following-forms complex-block))
                        acc             ""]
                   (if (empty? current-clauses) acc
-                      (let [current-clause       (first current-clauses)
+                      (let [indent               (make-indent indent-level)
+                            current-clause       (first current-clauses)
                             condition            (first current-clause)
                             clause-form-rendered (string/join (interpose "\n"
                                                                          (mapv (partial render-with-indent
                                                                                         (+ indent-level 4))
                                                                                (second current-clause))))
-                            clause-rendered      (str clause-name " " condition "\n" clause-form-rendered)]
+                            clause-rendered      (str indent clause-name " " condition "\n" clause-form-rendered)]
                         (recur (rest current-clauses) (str acc clause-rendered "\n"))))))]
-        (str (alt-first indent-level complex-block) "\n" (alt-rest indent-level complex-block)))))
+        (str (alt-first indent-level complex-block) "\n"
+             (alt-rest indent-level complex-block) ; don't need a newline
+             (make-indent indent-level) "end"))))
 
 (defn render-block [indent-level block]
   (let [block-type (name (block :type))]
@@ -373,22 +377,24 @@
   (trampoline (partial (dispatch-renderer component) indent-level) component))
 
 (defn render [component]
-  (render-with-indent 0 component))
+  (render-with-indent 4 component))
 
 (defn sequence-diagram
   "Make a Sequence Diagram."
   [& forms]
-  'TODO)
+  (str "sequenceDiagram\n" (string/join (interpose "\n" (mapv render forms)))))
 
 (comment "========================================"
-  (println (render (loop- "hihi"
-                          (solid-arrow :alice :bob "hihi")
-                          (solid-arrow 'bob 'alice "hoho"))))
-
-  (println (render (optional "hihi"
-                             (solid-arrow :alice :bob "hihi")
-                             (solid-arrow 'bob 'alice "hoho"))))
-
-  (println (render (highlight :green
+  (println (sequence-diagram
+             (loop- "until dead"
+                    (solid-arrow :alice :bob "hihi")
+                    (solid-arrow :bob :alice "hoho")
+                    (optional "hoho"
                               (solid-arrow :alice :bob "hihi")
-                              (solid-arrow 'bob 'alice "hoho")))))
+                              (alternative
+                                ["x = 1" [(solid-arrow :alice :bob "hihi")]]
+                                ["x = 2" [(solid-arrow :bob :john "hihi")]]
+                                ["x = 3" [(solid-arrow :john :alice "hihi")]])))
+             (parallel
+               ["alice to bob" [(solid-arrow :alice :bob "hihi")]]
+               ["bob to alice" [(solid-arrow :bob :alice "hihi")]]))))
