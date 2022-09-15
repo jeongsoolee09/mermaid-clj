@@ -2,72 +2,86 @@
 
 ;; ============ nodes ============
 
-(defn node [& label id]
+(defn node [& {:keys [label id]
+               :or   {label " " id nil}}]
   {:type  :node/normal
    :label label
    :id    id})
 
-(defn round-edge [& label id]
+(defn round-edge [& {:keys [label id]
+                     :or   {label " " id nil}}]
   {:type  :node/round-edge
    :label label
    :id    id})
 
-(defn pill [& label id]
+(defn pill [& {:keys [label id]
+               :or   {label " " id nil}}]
   {:type  :node/pill
    :label label
    :id    id})
 
-(defn subroutine [& label id]
+(defn subroutine [& {:keys [label id]
+                     :or   {label " " id nil}}]
   {:type  :node/subroutine
    :label label
    :id    id})
 
-(defn database [& label id]
+(defn database [& {:keys [label id]
+                   :or   {label " " id nil}}]
   {:type  :node/database
    :label label
    :id    id})
 
-(defn circle [& label id]
+(defn circle [& {:keys [label id]
+                 :or   {label " " id nil}}]
   {:type  :node/circle
    :label label
    :id    id})
 
-(defn ribbon [& label id]
+(defn ribbon [& {:keys [label id]
+                 :or   {label " " id nil}}]
   {:type  :node/ribbon
    :label label
    :id    id})
 
-(defn rhombus [& label id]
+(defn rhombus [& {:keys [label id]
+                  :or   {label " " id nil}}]
   {:type  :node/rhombus
    :label label
    :id    id})
 
-(defn hexagon [& label id]
+(defn hexagon [& {:keys [label id]
+                  :or   {label " " id nil}}]
   {:type  :node/hexagon
    :label label
    :id    id})
 
-(defn slanted [& label id]
+(defn slanted [& {:keys [label id]
+                  :or   {label " " id nil}}]
   {:type  :node/slanted
    :label label
    :id    id})
 
-(defn slanted-alt [& label id]
+(defn slanted-alt [& {:keys [label id]
+                      :or   {label " " id nil}}]
   {:type  :node/slanted-alt
    :label label
    :id    id})
 
-(defn trapezoid [& label id]
+(defn trapezoid [& {:keys [label id]
+                    :or   {label " " id nil}}]
   {:type  :node/trapezoid
    :label label
    :id    id})
 
-(defn trapezoid-alt [& label id]
+(defn trapezoid-alt [& {:keys [label id]
+                        :or   {label " " id nil}}]
   {:type  :node/trapezoid-alt
    :label label
    :id    id})
 
-(defn double-circle [& label id]
+(defn double-circle [& {:keys [label id]
+                        :or   {label " " id nil}}]
   {:type  :node/double-circle
    :label label
    :id    id})
@@ -156,33 +170,36 @@
   "Render a single node."
   [node]
   (let [type  (name (node :type))
+        id    (if (node :id) (node :id) (id-maker))
         label (node :label)]
     (cond (= type "normal")
-          (str ())
+          (str id "[" label "]")
           (= type "round-edge")
-          ()
+          (str id "(" label ")")
           (= type "pill")
-          ()
+          (str id "([" label "])")
           (= type "subroutine")
-          ()
+          (str id "[[" label "]]")
+          (= type "database")
+          (str id "[(" label ")]")
           (= type "circle")
-          ()
+          (str id "((" label "))")
           (= type "ribbon")
-          ()
+          (str id ">" label "]")
           (= type "rhombus")
-          ()
+          (str id "{" label "}")
           (= type "hexagon")
-          ()
+          (str id "{{" label "}}")
           (= type "slanted")
-          ()
+          (str id "[/" label "/]")
           (= type "slanted-alt")
-          ()
+          (str id "[\\" label "\\]")
           (= type "trapezoid")
-          ()
+          (str id "[/" label "\\]")
           (= type "trapezoid-alt")
-          ()
+          (str id "[\\" label "/]")
           (= type "double-circle")
-          ())))
+          (str id "(((" label ")))"))))
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
