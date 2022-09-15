@@ -144,6 +144,14 @@
 
 ;; ============ renderer ============
 
+(def id-maker
+  ;; WARNING This is a stateful function
+  (let [number (atom 0)]
+    (fn []
+      (do
+        (swap! number inc)
+        (str "id" @number)))))
+
 (defn render-node
   "Render a single node."
   [node]
@@ -151,18 +159,30 @@
         label (node :label)]
     (cond (= type "normal")
           (str ())
-          (= type "round-edge")    ()
-          (= type "pill")          ()
-          (= type "subroutine")    ()
-          (= type "circle")        ()
-          (= type "ribbon")        ()
-          (= type "rhombus")       ()
-          (= type "hexagon")       ()
-          (= type "slanted")       ()
-          (= type "slanted-alt")   ()
-          (= type "trapezoid")     ()
-          (= type "trapezoid-alt") ()
-          (= type "double-circle") ())))
+          (= type "round-edge")
+          ()
+          (= type "pill")
+          ()
+          (= type "subroutine")
+          ()
+          (= type "circle")
+          ()
+          (= type "ribbon")
+          ()
+          (= type "rhombus")
+          ()
+          (= type "hexagon")
+          ()
+          (= type "slanted")
+          ()
+          (= type "slanted-alt")
+          ()
+          (= type "trapezoid")
+          ()
+          (= type "trapezoid-alt")
+          ()
+          (= type "double-circle")
+          ())))
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
