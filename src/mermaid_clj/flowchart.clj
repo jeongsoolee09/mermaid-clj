@@ -152,10 +152,6 @@
 
 (defn subgraph [name & forms])
 
-;; ============ flowchart ============
-
-(defn flowchart [direction & forms])
-
 ;; ============ renderer ============
 
 (def id-maker
@@ -200,6 +196,55 @@
           (str id "[\\" label "/]")
           (= type "double-circle")
           (str id "(((" label ")))"))))
+
+(defn render-line
+  "Render a line, together with its including nodes."
+  [line]
+  (let [type    (name (line :type))
+        from    (name (line :from))
+        to      (name (line :to))
+        length  (name (line :length))
+        message (name (line :message))]
+    (cond (= type "normal")
+          ()
+          (= type "thick")
+          ()
+          (= type "dotted")
+          ())))
+
+(defn render-arrow
+  "Render a arrow, together with its including nodes."
+  [arrow]
+  (let [type    (name (arrow :type))
+        from    (name (arrow :from))
+        to      (name (arrow :to))
+        length  (name (arrow :length))
+        message (name (arrow :message))]
+    (cond (= type "normal")
+          ()
+          (= type "thick")
+          ()
+          (= type "dotted")
+          ())))
+
+(defn render-link
+  "Render a link, together with its including nodes."
+  [link]
+  (let [type    (namespace (arrow :type))
+        subtype (name (arrow :type))
+        from    (name (arrow :from))
+        to      (name (arrow :to))
+        length  (name (arrow :length))
+        message (name (arrow :message))]
+    (cond (= type "line")
+          (render-line subtype from to length message)
+          (= type "arrow")
+          (render-arrow subtype from to length message))))
+
+;; ============ flowchart ============
+
+(defn flowchart [direction & forms]
+  (str (name direction) (render forms)))
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
