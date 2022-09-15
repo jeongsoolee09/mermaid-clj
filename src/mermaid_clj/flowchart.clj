@@ -2,61 +2,75 @@
 
 ;; ============ nodes ============
 
-(defn node [& message]
-  {:type    :node/normal
-   :message message})
+(defn node [& label id]
+  {:type  :node/normal
+   :label label
+   :id    id})
 
-(defn round-edge [& message]
-  {:type    :node/round-edge
-   :message message})
+(defn round-edge [& label id]
+  {:type  :node/round-edge
+   :label label
+   :id    id})
 
-(defn pill [& message]
-  {:type    :node/pill
-   :message message})
+(defn pill [& label id]
+  {:type  :node/pill
+   :label label
+   :id    id})
 
-(defn subroutine [& message]
-  {:type    :node/subroutine
-   :message message})
+(defn subroutine [& label id]
+  {:type  :node/subroutine
+   :label label
+   :id    id})
 
-(defn database [& message]
-  {:type    :node/database
-   :message message})
+(defn database [& label id]
+  {:type  :node/database
+   :label label
+   :id    id})
 
-(defn circle [& message]
-  {:type    :node/circle
-   :message message})
+(defn circle [& label id]
+  {:type  :node/circle
+   :label label
+   :id    id})
 
-(defn ribbon [& message]
-  {:type    :node/ribbon
-   :message message})
+(defn ribbon [& label id]
+  {:type  :node/ribbon
+   :label label
+   :id    id})
 
-(defn rhombus [& message]
-  {:type    :node/rhombus
-   :message message})
+(defn rhombus [& label id]
+  {:type  :node/rhombus
+   :label label
+   :id    id})
 
-(defn hexagon [& message]
-  {:type    :node/hexagon
-   :message message})
+(defn hexagon [& label id]
+  {:type  :node/hexagon
+   :label label
+   :id    id})
 
-(defn slanted [& message]
-  {:type    :node/slanted
-   :message message})
+(defn slanted [& label id]
+  {:type  :node/slanted
+   :label label
+   :id    id})
 
-(defn slanted-alt [& message]
-  {:type    :node/slanted-alt
-   :message message})
+(defn slanted-alt [& label id]
+  {:type  :node/slanted-alt
+   :label label
+   :id    id})
 
-(defn trapezoid [& message]
-  {:type    :node/trapezoid
-   :message message})
+(defn trapezoid [& label id]
+  {:type  :node/trapezoid
+   :label label
+   :id    id})
 
-(defn trapezoid-alt [& message]
-  {:type    :node/trapezoid-alt
-   :message message})
+(defn trapezoid-alt [& label id]
+  {:type  :node/trapezoid-alt
+   :label label
+   :id    id})
 
-(defn double-circle [& message]
-  {:type    :node/double-circle
-   :message message})
+(defn double-circle [& label id]
+  {:type  :node/double-circle
+   :label label
+   :id    id})
 
 ;; ============ links ============
 
@@ -122,11 +136,33 @@
 
 ;; ============ subgraph ============
 
-(defn subgraph [])
+(defn subgraph [name & forms])
 
 ;; ============ flowchart ============
 
 (defn flowchart [direction & forms])
+
+;; ============ renderer ============
+
+(defn render-node
+  "Render a single node."
+  [node]
+  (let [type  (name (node :type))
+        label (node :label)]
+    (cond (= type "normal")
+          (str ())
+          (= type "round-edge")    ()
+          (= type "pill")          ()
+          (= type "subroutine")    ()
+          (= type "circle")        ()
+          (= type "ribbon")        ()
+          (= type "rhombus")       ()
+          (= type "hexagon")       ()
+          (= type "slanted")       ()
+          (= type "slanted-alt")   ()
+          (= type "trapezoid")     ()
+          (= type "trapezoid-alt") ()
+          (= type "double-circle") ())))
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
