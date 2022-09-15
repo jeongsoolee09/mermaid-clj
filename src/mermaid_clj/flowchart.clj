@@ -61,60 +61,72 @@
 ;; ============ links ============
 
 (defn line [from to
-            & message {:keys [length]
-                       :or   {length 1}}]
+            {:keys [length message]
+             :or   {length 1 message " "}}]
   {:type    :line/normal
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn arrow [from to
-             & message {:keys [length]
-                        :or   {length 1}}]
+             {:keys [length message]
+              :or   {length 1 message " "}}]
   {:type    :arrow/normal
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn thick-line [from to
-                  & message {:keys [length]
-                             :or   {length 1}}]
+                  {:keys [length message]
+                   :or   {length 1 message " "}}]
   {:type    :line/thick
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn thick-arrow [from to
-                   & message {:keys [length]
-                              :or   {length 1}}]
+                   {:keys [length message]
+                    :or   {length 1 message " "}}]
   {:type    :arrow/thick
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn dotted-line [from to
-                   & message {:keys [length]
-                              :or   {length 1}}]
+                   {:keys [length message]
+                    :or   {length 1 message " "}}]
   {:type    :line/dotted
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn dotted-arrow [from to
-                    & message {:keys [length]
-                               :or   {length 1}}]
+                    {:keys [length message]
+                     :or   {length 1 message " "}}]
   {:type    :arrow/dotted
    :from    from
    :to      to
-   :message message})
+   :message message
+   :length  (if (<= 0 length 3) length
+                (throw (IllegalArgumentException. "Invalid length")))})
 
 ;; ============ subgraph ============
 
-(defn flowchart [])
+(defn subgraph [])
 
 ;; ============ flowchart ============
 
-(defn flowchart [])
+(defn flowchart [direction & forms])
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
