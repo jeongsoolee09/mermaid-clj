@@ -300,12 +300,13 @@
   (string/join (drop-while #(not= \space %) (seq rendered-link))))
 
 (defn render-position [position]
+  ;; TODO this might need a rewrite.
   (let [type (name (position :type))]
     (cond (= type "chain-links")
-          (let [links (:links position)
+          (let [links          (:links position)
                 rendered-links (map render links)]
-            (string/join (first rendered-links)
-                         (string/join (map truncate-link (rest rendered-links)))))
+            (str (first rendered-links)
+                 (string/join (map truncate-link (rest rendered-links)))))
           (= type "parallel-links")
           (let [links (:links position)]
             (string/join " & " (map render links)))
@@ -317,8 +318,8 @@
 
 (defn- dispatch-renderer [form]
   (let [type (namespace (node :type))]
-    (cond (= type "node") render-node
-          (= type "link") render-link
+    (cond (= type "node")     render-node
+          (= type "link")     render-link
           (= type "position") render-position)))
 
 (defn- render-with-indent [indent-level form]
