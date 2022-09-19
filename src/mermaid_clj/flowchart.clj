@@ -1,6 +1,6 @@
 (ns mermaid-clj.flowchart
-  (require [clojure.core.match :refer [match]])
-  (require [clojure.string :as string]))
+  (:require [clojure.core.match :refer [match]]
+            [clojure.string :as string]))
 
 ;; ============ nodes ============
 
@@ -101,11 +101,12 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn arrow [from to
-             {:keys [length message]
-              :or   {length 1 message " "}}]
+             {:keys [length message head]
+              :or   {length 1 message " " head :normal}}]
   {:type    :arrow/normal
    :from    from
    :to      to
+   :head    head
    :message message
    :length  (if (<= 0 length 3) length
                 (throw (IllegalArgumentException. "Invalid length")))})
@@ -121,11 +122,12 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn thick-arrow [from to
-                   {:keys [length message]
-                    :or   {length 1 message " "}}]
+                   {:keys [length message head]
+                    :or   {length 1 message " " head :normal}}]
   {:type    :arrow/thick
    :from    from
    :to      to
+   :head    head
    :message message
    :length  (if (<= 0 length 3) length
                 (throw (IllegalArgumentException. "Invalid length")))})
@@ -141,11 +143,12 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn dotted-arrow [from to
-                    {:keys [length message]
-                     :or   {length 1 message " "}}]
+                    {:keys [length message head]
+                     :or   {length 1 message " " head :normal}}]
   {:type    :arrow/dotted
    :from    from
    :to      to
+   :head    head
    :message message
    :length  (if (<= 0 length 3) length
                 (throw (IllegalArgumentException. "Invalid length")))})
@@ -213,6 +216,9 @@
           (= type "double-circle")
           (str id "(((" label ")))"))))
 
+(defn iter-string [num string]
+  (string/join (repeat num string)))
+
 (defn render-line
   "Render a line, together with its including nodes."
   [line]
@@ -222,23 +228,11 @@
         length  (name (line :length))
         message (name (line :message))]
     (cond (= type "normal")
-          (match length
-            1 (str from "---" to)
-            2 (str from "----" to)
-            3 (str from "-----" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
+          (str from (iter-string (+ length 2) "-") to)
           (= type "thick")
-          (match length
-            1 (str from "===" to)
-            2 (str from "====" to)
-            3 (str from "=====" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
+          (str from (iter-string (+ length 2) "=") to)
           (= type "dotted")
-          (match length
-            1 (str from "-.-" to)
-            2 (str from "-..-" to)
-            3 (str from "-...-" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4"))))))
+          (str from "-" (iter-string length ".") "-" to))))
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
@@ -246,26 +240,15 @@
   (let [type    (name (arrow :type))
         from    (name (arrow :from))
         to      (name (arrow :to))
+        head    (name (arrow :head))
         length  (name (arrow :length))
         message (name (arrow :message))]
     (cond (= type "normal")
-          (match length
-            1 (str from "--->" to)
-            2 (str from "---->" to)
-            3 (str from "----->" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
+          (str from (iter-string (+ length 1) "-") head to)
           (= type "thick")
-          (match length
-            1 (str from "===>" to)
-            2 (str from "====>" to)
-            3 (str from "=====>" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
+          (str from (iter-string (+ length 1) "=") head to)
           (= type "dotted")
-          (match length
-            1 (str from "-.->" to)
-            2 (str from "-..->" to)
-            3 (str from "-...->" to)
-            :else (throw (IllegalAccessException. "Link length cannot be over 4"))))))
+          (str from "-" (iter-string (+ length 1) ".") "-" head to))))
 
 (defn render-link
   "Render a link, together with its including nodes."
