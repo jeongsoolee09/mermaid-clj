@@ -379,6 +379,8 @@
 (defn render [component]
   (render-with-indent 4 component))
 
+;; ============ main ============
+
 (defn sequence-diagram
   "Make a Sequence Diagram."
   [& forms]
