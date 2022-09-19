@@ -1,4 +1,6 @@
-(ns mermaid-clj.flowchart)
+(ns mermaid-clj.flowchart
+  (require [clojure.core.match :refer [match]])
+  (require [clojure.string :as string]))
 
 ;; ============ nodes ============
 
@@ -220,11 +222,23 @@
         length  (name (line :length))
         message (name (line :message))]
     (cond (= type "normal")
-          ()
+          (match length
+            1 (str from "---" to)
+            2 (str from "----" to)
+            3 (str from "-----" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
           (= type "thick")
-          ()
+          (match length
+            1 (str from "===" to)
+            2 (str from "====" to)
+            3 (str from "=====" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
           (= type "dotted")
-          ())))
+          (match length
+            1 (str from "-.-" to)
+            2 (str from "-..-" to)
+            3 (str from "-...-" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4"))))))
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
@@ -235,11 +249,23 @@
         length  (name (arrow :length))
         message (name (arrow :message))]
     (cond (= type "normal")
-          ()
+          (match length
+            1 (str from "--->" to)
+            2 (str from "---->" to)
+            3 (str from "----->" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
           (= type "thick")
-          ()
+          (match length
+            1 (str from "===>" to)
+            2 (str from "====>" to)
+            3 (str from "=====>" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4")))
           (= type "dotted")
-          ())))
+          (match length
+            1 (str from "-.->" to)
+            2 (str from "-..->" to)
+            3 (str from "-...->" to)
+            :else (throw (IllegalAccessException. "Link length cannot be over 4"))))))
 
 (defn render-link
   "Render a link, together with its including nodes."
@@ -266,12 +292,18 @@
 (defn render [form]
   (render-with-indent 4 form))
 
-;; ============ flowchart ============
+;; ============ main ============
 
 (defn flowchart
   "Make a Flowchart."
   [direction & forms]
-  (str (name direction) (string/join (interpose "\n" (mapv render forms)))))
+  (str (name direction)
+       (string/join (interpose "\n" (mapv render forms)))))
+
+;; Declaring shapes and adding messages are coupled together...
+;; => using a **clojure let block** would solve the problem elegantly.
+;; => what's the point of using an embedded DSL when you can't use the host language
+;;    to write the desired software?
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
@@ -280,12 +312,9 @@
 ;;     D --> B
 ;;     B ---->|No| E[End]
 
-;; declaring shapes and adding messages are coupled together...
-;; => using a **clojure let block** would solve the problem elegantly.
-;; => what's the point of using an embedded DSL when you can't use the host language
-;;    to write the desired software?
+;; translates to:
 
-;; (flow-chart :TD        ; can either be symbol, keyword, or string
+;; (flow-chart :TD
 ;;    (let [A (node "Start")
 ;;          B (rhombus "Is it?")
 ;;          C (node "OK")
