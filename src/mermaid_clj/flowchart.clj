@@ -153,10 +153,6 @@
    :length  (if (<= 0 length 3) length
                 (throw (IllegalArgumentException. "Invalid length")))})
 
-;; ============ subgraph ============
-
-(defn subgraph [name & forms])
-
 ;; ============ predicates ============
 
 (defn node? [form]
@@ -171,7 +167,29 @@
 (defn link? [form]
   (or (link? form) (arrow? form)))
 
+;; ============ positions ============
+
+(defn chain-links [& links]
+  {:type  :position/chain-links
+   :links links})
+
+(defn parallel-links [& links]
+  {:type  :position/parallel-links
+   :links links})
+
+(defn parallel-nodes [arrow & node-colls]
+  {:type       :position/parallel-nodes
+   :arrow      arrow
+   :node-colls node-colls})
+
+;; ============ subgraph ============
+
+(defn subgraph [name & forms])
+
 ;; ============ renderer ============
+
+(declare render)
+(declare dispatch-renderer)
 
 (def id-maker
   ;; WARNING This is a stateful function
@@ -216,7 +234,7 @@
           (= type "double-circle")
           (str id "(((" label ")))"))))
 
-(defn iter-string [num string]
+(defn- iter-string [num string]
   (string/join (repeat num string)))
 
 (defn render-line
@@ -228,11 +246,22 @@
         length  (name (line :length))
         message (name (line :message))]
     (cond (= type "normal")
-          (str from (iter-string (+ length 2) "-") to)
+          (str from (iter-string (+ length 2) "-")
+               "|" message "|" to)
           (= type "thick")
-          (str from (iter-string (+ length 2) "=") to)
+          (str from (iter-string (+ length 2) "=")
+               "|" message "|" to)
           (= type "dotted")
-          (str from "-" (iter-string length ".") "-" to))))
+          (str from "-" (iter-string length ".") "-"
+               "|" message "|" to))))
+
+(defn- arrow-head->string [arrow-head]
+  (match [(name arrow-head)]
+    ["normal"] ">"
+    ["round"]  "o"
+    ["cross"]  "x"
+    :else    (throw (IllegalArgumentException.
+                      (name arrow-head)))))
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
@@ -240,15 +269,18 @@
   (let [type    (name (arrow :type))
         from    (name (arrow :from))
         to      (name (arrow :to))
-        head    (name (arrow :head))
+        head    (arrow-head->string (name (arrow :head)))
         length  (name (arrow :length))
         message (name (arrow :message))]
     (cond (= type "normal")
-          (str from (iter-string (+ length 1) "-") head to)
+          (str from (iter-string (+ length 1) "-") head
+               "|" message "|" to)
           (= type "thick")
-          (str from (iter-string (+ length 1) "=") head to)
+          (str from (iter-string (+ length 1) "=") head
+               "|" message "|" to)
           (= type "dotted")
-          (str from "-" (iter-string (+ length 1) ".") "-" head to))))
+          (str from "-" (iter-string (+ length 1) ".") "-" head
+               "|" message "|" to))))
 
 (defn render-link
   "Render a link, together with its including nodes."
@@ -264,12 +296,32 @@
           (= type "arrow")
           (render-arrow subtype from to length message))))
 
-(defn dispatch-renderer [form]
+(defn- truncate-link [rendered-link]
+  (string/join (drop-while #(not= \space %) (seq rendered-link))))
+
+(defn render-position [position]
+  (let [type (name (position :type))]
+    (cond (= type "chain-links")
+          (let [links (:links position)
+                rendered-links (map render links)]
+            (string/join (first rendered-links)
+                         (string/join (map truncate-link (rest rendered-links)))))
+          (= type "parallel-links")
+          (let [links (:links position)]
+            (string/join " & " (map render links)))
+          (= type "parallel-nodes")
+          (let [node-colls (:node-colls position)]
+            (string/join (str " " (render-arrow arrow) " ")
+                         (map (partial string/join " & ")
+                              (map render-node node-colls)))))))
+
+(defn- dispatch-renderer [form]
   (let [type (namespace (node :type))]
     (cond (= type "node") render-node
-          (= type "link") render-link)))
+          (= type "link") render-link
+          (= type "position") render-position)))
 
-(defn render-with-indent [indent-level form]
+(defn- render-with-indent [indent-level form]
   (trampoline (partial (dispatch-renderer form) indent-level) form))
 
 (defn render [form]
