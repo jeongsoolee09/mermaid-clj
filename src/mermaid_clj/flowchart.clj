@@ -152,6 +152,20 @@
 
 (defn subgraph [name & forms])
 
+;; ============ predicates ============
+
+(defn node? [form]
+  (= "node" (namespace (:type form))))
+
+(defn line? [form]
+  (= "line" (namespace (:type form))))
+
+(defn arrow? [form]
+  (= "arrow" (namespace (:type form))))
+
+(defn link? [form]
+  (or (link? form) (arrow? form)))
+
 ;; ============ renderer ============
 
 (def id-maker
@@ -241,10 +255,23 @@
           (= type "arrow")
           (render-arrow subtype from to length message))))
 
+(defn dispatch-renderer [form]
+  (let [type (namespace (node :type))]
+    (cond (= type "node") render-node
+          (= type "link") render-link)))
+
+(defn render-with-indent [indent-level form]
+  (trampoline (partial (dispatch-renderer form) indent-level) form))
+
+(defn render [form]
+  (render-with-indent 4 form))
+
 ;; ============ flowchart ============
 
-(defn flowchart [direction & forms]
-  (str (name direction) (render forms)))
+(defn flowchart
+  "Make a Flowchart."
+  [direction & forms]
+  (str (name direction) (string/join (interpose "\n" (mapv render forms)))))
 
 ;; flowchart TD
 ;;     A[Start] --> B{Is it?}
