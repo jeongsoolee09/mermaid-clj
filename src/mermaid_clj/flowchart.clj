@@ -209,38 +209,25 @@
 
 (defn render-node
   "Render a single node."
-  [node]
+  [indent node]
   (let [type  (name (node :type))
         id    (if (node :id) (node :id) (id-maker))
         label (node :label)]
-    (cond (= type "normal")
-          (str id "[" label "]")
-          (= type "round-edge")
-          (str id "(" label ")")
-          (= type "pill")
-          (str id "([" label "])")
-          (= type "subroutine")
-          (str id "[[" label "]]")
-          (= type "database")
-          (str id "[(" label ")]")
-          (= type "circle")
-          (str id "((" label "))")
-          (= type "ribbon")
-          (str id ">" label "]")
-          (= type "rhombus")
-          (str id "{" label "}")
-          (= type "hexagon")
-          (str id "{{" label "}}")
-          (= type "slanted")
-          (str id "[/" label "/]")
-          (= type "slanted-alt")
-          (str id "[\\" label "\\]")
-          (= type "trapezoid")
-          (str id "[/" label "\\]")
-          (= type "trapezoid-alt")
-          (str id "[\\" label "/]")
-          (= type "double-circle")
-          (str id "(((" label ")))"))))
+    (match [type]
+      ["normal"]        (str id "[" label "]")
+      ["round-edge"]    (str id "(" label ")")
+      ["pill"]          (str id "([" label "])")
+      ["subroutine"]    (str id "[[" label "]]")
+      ["database"]      (str id "[(" label ")]")
+      ["circle"]        (str id "((" label "))")
+      ["ribbon"]        (str id ">" label "]")
+      ["rhombus"]       (str id "{" label "}")
+      ["hexagon"]       (str id "{{" label "}}")
+      ["slanted"]       (str id "[/" label "/]")
+      ["slanted-alt"]   (str id "[\\" label "\\]")
+      ["trapezoid"]     (str id "[/" label "\\]")
+      ["trapezoid-alt"] (str id "[\\" label "/]")
+      ["double-circle"] (str id "(((" label ")))"))))
 
 (defn- iter-string [num string]
   (string/join (repeat num string)))
@@ -253,15 +240,13 @@
         to      (name (line :to))
         length  (name (line :length))
         message (name (line :message))]
-    (cond (= type "normal")
-          (str from (iter-string (+ length 2) "-")
-               "|" message "|" to)
-          (= type "thick")
-          (str from (iter-string (+ length 2) "=")
-               "|" message "|" to)
-          (= type "dotted")
-          (str from "-" (iter-string length ".") "-"
-               "|" message "|" to))))
+    (match [type]
+      ["normal"] (str from (iter-string (+ length 2) "-")
+                      "|" message "|" to)
+      ["thick"]  (str from (iter-string (+ length 2) "=")
+                      "|" message "|" to)
+      ["dotted"] (str from "-" (iter-string length ".") "-"
+                      "|" message "|" to))))
 
 (defn- arrow-head->string [arrow-head]
   (match [(name arrow-head)]
@@ -280,15 +265,13 @@
         head    (arrow-head->string (name (arrow :head)))
         length  (name (arrow :length))
         message (name (arrow :message))]
-    (cond (= type "normal")
-          (str from (iter-string (+ length 1) "-") head
-               "|" message "|" to)
-          (= type "thick")
-          (str from (iter-string (+ length 1) "=") head
-               "|" message "|" to)
-          (= type "dotted")
-          (str from "-" (iter-string (+ length 1) ".") "-" head
-               "|" message "|" to))))
+    (match
+      ["normal"] (str from (iter-string (+ length 1) "-") head
+                      "|" message "|" to)
+      ["thick"]  (str from (iter-string (+ length 1) "=") head
+                       "|" message "|" to)
+      ["dotted"] (str from "-" (iter-string (+ length 1) ".") "-" head
+                       "|" message "|" to))))
 
 (defn render-link
   "Render a link, together with its including nodes."
@@ -299,36 +282,35 @@
         to      (name (arrow :to))
         length  (name (arrow :length))
         message (name (arrow :message))]
-    (cond (= type "line")
-          (render-line subtype from to length message)
-          (= type "arrow")
-          (render-arrow subtype from to length message))))
+    (match [type]
+      ["line"]  (render-line subtype from to length message)
+      ["arrow"] (render-arrow subtype from to length message))))
 
 (defn- truncate-link [rendered-link]
   (string/join (drop-while #(not= \space %) (seq rendered-link))))
 
 (defn render-position [position]
   ;; TODO this might need a rewrite.
-  (let [type (name (position :type))]
-    (cond (= type "chain-links")
-          (let [links          (:links position)
-                rendered-links (map render links)]
-            (str (first rendered-links)
-                 (string/join (map truncate-link (rest rendered-links)))))
-          (= type "parallel-links")
-          (let [links (:links position)]
-            (string/join " & " (map render links)))
-          (= type "parallel-nodes")
-          (let [node-colls (:node-colls position)]
-            (string/join (str " " (render-arrow arrow) " ")
-                         (map (partial string/join " & ")
-                              (map render-node node-colls)))))))
+  (match [(name (position :type))]
+    ["chain-links"]
+    (let [links          (:links position)
+          rendered-links (map render links)]
+      (str (first rendered-links)
+           (string/join (map truncate-link (rest rendered-links)))))
+    ["parallel-links"]
+    (let [links (:links position)]
+      (string/join " & " (map render links)))
+    ["parallel-nodes"]
+    (let [node-colls (:node-colls position)]
+      (string/join (str " " (render-arrow arrow) " ")
+                   (map (partial string/join " & ")
+                        (map render-node node-colls))))))
 
 (defn render-subgraph [subgraph]
   (let [name            (:name subgraph)
         following-forms (:forms subgraph)]
     (str "subgraph" " " name
-         (string/join "\n" (map render following-forms))
+         (string/join "\n" (map (partial render-with-indent (+ )) following-forms))
          "\nend")))
 
 (defn- dispatch-renderer [form]
