@@ -328,7 +328,8 @@
   (let [name            (:name subgraph)
         following-forms (:forms subgraph)]
     (str "subgraph" " " name
-         (string/join "\n" (map render following-forms)))))
+         (string/join "\n" (map render following-forms))
+         "\nend")))
 
 (defn- dispatch-renderer [form]
   (match [(namespace (node :type))]
