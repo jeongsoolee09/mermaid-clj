@@ -184,7 +184,15 @@
 
 ;; ============ subgraph ============
 
-(defn subgraph [name & forms])
+(defn subgraph [name & forms]
+  {:type  :block/subgraph
+   :forms forms})
+
+;; ============ labels ============
+
+(defn direction [direction]
+  {:type      :label/direction
+   :direction :direction})
 
 ;; ============ renderer ============
 
@@ -260,8 +268,8 @@
     ["normal"] ">"
     ["round"]  "o"
     ["cross"]  "x"
-    :else    (throw (IllegalArgumentException.
-                      (name arrow-head)))))
+    :else      (throw (IllegalArgumentException.
+                        (name arrow-head)))))
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
@@ -316,11 +324,17 @@
                          (map (partial string/join " & ")
                               (map render-node node-colls)))))))
 
+(defn render-subgraph [subgraph]
+  (let [name            (:name subgraph)
+        following-forms (:forms subgraph)]
+    (str "subgraph" " " name
+         (string/join "\n" (map render following-forms)))))
+
 (defn- dispatch-renderer [form]
-  (let [type (namespace (node :type))]
-    (cond (= type "node")     render-node
-          (= type "link")     render-link
-          (= type "position") render-position)))
+  (match [(namespace (node :type))]
+    ["node"]     render-node
+    ["link"]     render-link
+    ["position"] render-position))
 
 (defn- render-with-indent [indent-level form]
   (trampoline (partial (dispatch-renderer form) indent-level) form))
