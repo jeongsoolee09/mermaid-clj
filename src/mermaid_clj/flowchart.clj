@@ -184,8 +184,11 @@
 
 ;; ============ subgraph ============
 
-(defn subgraph [name & forms]
+(defn subgraph
+  [id label & forms]
   {:type  :block/subgraph
+   :id    id
+   :label label
    :forms forms})
 
 ;; ============ labels ============
@@ -196,7 +199,7 @@
 
 ;; ============ renderer ============
 
-(declare render)
+(declare render-with-indent)
 (declare dispatch-renderer)
 
 (def id-maker
@@ -207,46 +210,53 @@
         (swap! number inc)
         (str "id" @number)))))
 
+(defn make-indent [indent]
+  (string/join (for [_ (range indent)] " ")))
+
 (defn render-node
   "Render a single node."
-  [indent node]
-  (let [type  (name (node :type))
-        id    (if (node :id) (node :id) (id-maker))
-        label (node :label)]
-    (match [type]
-      ["normal"]        (str id "[" label "]")
-      ["round-edge"]    (str id "(" label ")")
-      ["pill"]          (str id "([" label "])")
-      ["subroutine"]    (str id "[[" label "]]")
-      ["database"]      (str id "[(" label ")]")
-      ["circle"]        (str id "((" label "))")
-      ["ribbon"]        (str id ">" label "]")
-      ["rhombus"]       (str id "{" label "}")
-      ["hexagon"]       (str id "{{" label "}}")
-      ["slanted"]       (str id "[/" label "/]")
-      ["slanted-alt"]   (str id "[\\" label "\\]")
-      ["trapezoid"]     (str id "[/" label "\\]")
-      ["trapezoid-alt"] (str id "[\\" label "/]")
-      ["double-circle"] (str id "(((" label ")))"))))
+  [indent-level node]
+  (let [type   (name (node :type))
+        id     (if (node :id) (node :id) (id-maker))
+        label  (node :label)
+        indent (make-indent indent-level)]
+    (str indent
+         (match [type]
+           ["normal"]        (str id   "[" label "]")
+           ["round-edge"]    (str id   "(" label ")")
+           ["pill"]          (str id  "([" label "])")
+           ["subroutine"]    (str id  "[[" label "]]")
+           ["database"]      (str id  "[(" label ")]")
+           ["circle"]        (str id  "((" label "))")
+           ["ribbon"]        (str id   ">" label "]")
+           ["rhombus"]       (str id   "{" label "}")
+           ["hexagon"]       (str id  "{{" label "}}")
+           ["slanted"]       (str id  "[/" label "/]")
+           ["slanted-alt"]   (str id "[\\" label "\\]")
+           ["trapezoid"]     (str id  "[/" label "\\]")
+           ["trapezoid-alt"] (str id "[\\" label "/]")
+           ["double-circle"] (str id "(((" label ")))")))))
 
 (defn- iter-string [num string]
   (string/join (repeat num string)))
 
 (defn render-line
   "Render a line, together with its including nodes."
-  [line]
+  [indent-level line]
   (let [type    (name (line :type))
         from    (name (line :from))
         to      (name (line :to))
         length  (name (line :length))
-        message (name (line :message))]
-    (match [type]
-      ["normal"] (str from (iter-string (+ length 2) "-")
-                      "|" message "|" to)
-      ["thick"]  (str from (iter-string (+ length 2) "=")
-                      "|" message "|" to)
-      ["dotted"] (str from "-" (iter-string length ".") "-"
-                      "|" message "|" to))))
+        message (name (line :message))
+        indent  (make-indent indent-level)]
+    (str indent
+         (match [type]
+           ["normal"] (str from (iter-string (+ length 2) "-")
+                           "|" message "|" to)
+           ["thick"]  (str from (iter-string (+ length 2) "=")
+                           "|" message "|" to)
+           ["dotted"] (str from "-" (iter-string length ".") "-"
+                           "|" message "|" to)))))
 
 (defn- arrow-head->string [arrow-head]
   (match [(name arrow-head)]
@@ -258,58 +268,71 @@
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
-  [arrow]
+  [indent-level arrow]
   (let [type    (name (arrow :type))
         from    (name (arrow :from))
         to      (name (arrow :to))
         head    (arrow-head->string (name (arrow :head)))
         length  (name (arrow :length))
-        message (name (arrow :message))]
-    (match
-      ["normal"] (str from (iter-string (+ length 1) "-") head
-                      "|" message "|" to)
-      ["thick"]  (str from (iter-string (+ length 1) "=") head
-                       "|" message "|" to)
-      ["dotted"] (str from "-" (iter-string (+ length 1) ".") "-" head
-                       "|" message "|" to))))
+        message (name (arrow :message))
+        indent  (make-indent indent-level)]
+    (str indent
+         (match [type]
+           ["normal"] (str from (iter-string (+ length 1) "-") head
+                           "|" message "|" to)
+           ["thick"]  (str from (iter-string (+ length 1) "=") head
+                           "|" message "|" to)
+           ["dotted"] (str from "-" (iter-string (+ length 1) ".") "-" head
+                           "|" message "|" to)))))
 
 (defn render-link
   "Render a link, together with its including nodes."
-  [link]
+  [indent-level link]
   (let [type    (namespace (arrow :type))
         subtype (name (arrow :type))
         from    (name (arrow :from))
         to      (name (arrow :to))
         length  (name (arrow :length))
-        message (name (arrow :message))]
-    (match [type]
-      ["line"]  (render-line subtype from to length message)
-      ["arrow"] (render-arrow subtype from to length message))))
+        message (name (arrow :message))
+        indent  (make-indent indent-level)]
+    (str indent
+         (match [type]
+           ["line"]  (render-line  indent-level subtype from to length message)
+           ["arrow"] (render-arrow indent-level subtype from to length message)))))
 
 (defn- truncate-link [rendered-link]
-  (string/join (drop-while #(not= \space %) (seq rendered-link))))
+  (->> rendered-link
+       (string/trim)
+       (seq)
+       (drop-while #(not= \space %))
+       (string/join)))
 
-(defn render-position [position]
+(defn render-position [indent-level position]
   ;; TODO this might need a rewrite.
-  (match [(name (position :type))]
-    ["chain-links"]
-    (let [links          (:links position)
-          rendered-links (map render links)]
-      (str (first rendered-links)
-           (string/join (map truncate-link (rest rendered-links)))))
-    ["parallel-links"]
-    (let [links (:links position)]
-      (string/join " & " (map render links)))
-    ["parallel-nodes"]
-    (let [node-colls (:node-colls position)]
-      (string/join (str " " (render-arrow arrow) " ")
-                   (map (partial string/join " & ")
-                        (map render-node node-colls))))))
+  (let [type   (name (position :type))
+        indent (make-indent indent-level)]
+    (str indent
+         (match [type]
+           ["chain-links"]
+           (let [links          (:links position)
+                 rendered-links (map render links)]
+             (str (first rendered-links)
+                  (string/join (map truncate-link (rest rendered-links)))))
+           ["parallel-links"]
+           (let [links (:links position)]
+             (string/join " & " (map render links)))
+           ["parallel-nodes"]
+           (let [node-colls (:node-colls position)]
+             (string/join (str " " (render-arrow arrow) " ")
+                          (map (partial string/join " & ")
+                               (map render-node node-colls))))))))
 
-(defn render-subgraph [subgraph]
-  (let [name            (:name subgraph)
-        following-forms (:forms subgraph)]
-    (str "subgraph" " " name
+(defn render-subgraph [indent-level subgraph]
+  (let [id              (:id subgraph)
+        label           (:label subgraph)
+        following-forms (:forms subgraph)
+        indent          (make-indent indent-level)]
+    (str indent "subgraph" " " id " " (if label (str "[" label "]") "")
          (string/join "\n" (map (partial render-with-indent (+ )) following-forms))
          "\nend")))
 
