@@ -4,105 +4,172 @@
 
 ;; ============ nodes ============
 
-(defn node [& {:keys [label id]
-               :or   {label " " id nil}}]
-  {:type  :node/normal
-   :label label
-   :id    id})
+(defn node
+  ([id]
+   {:type  :node/normal
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/normal
+    :id    id
+    :label label}))
 
-(defn round-edge [& {:keys [label id]
-                     :or   {label " " id nil}}]
-  {:type  :node/round-edge
-   :label label
-   :id    id})
+(defn round-edge
+  ([id]
+   {:type  :node/round-edge
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/round-edge
+    :id    id
+    :label label}))
 
-(defn pill [& {:keys [label id]
-               :or   {label " " id nil}}]
-  {:type  :node/pill
-   :label label
-   :id    id})
+(defn pill
+  ([id]
+   {:type  :node/pill
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/pill
+    :id    id
+    :label label}))
 
-(defn subroutine [& {:keys [label id]
-                     :or   {label " " id nil}}]
-  {:type  :node/subroutine
-   :label label
-   :id    id})
+(defn subroutine
+  ([id]
+   {:type  :node/subroutine
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/subroutine
+    :id    id
+    :label label}))
 
-(defn database [& {:keys [label id]
-                   :or   {label " " id nil}}]
-  {:type  :node/database
-   :label label
-   :id    id})
+(defn database
+  ([id]
+   {:type  :node/database
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/database
+    :id    id
+    :label label}))
 
-(defn circle [& {:keys [label id]
-                 :or   {label " " id nil}}]
-  {:type  :node/circle
-   :label label
-   :id    id})
+(defn circle
+  ([id]
+   {:type  :node/circle
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/circle
+    :id    id
+    :label label}))
 
-(defn ribbon [& {:keys [label id]
-                 :or   {label " " id nil}}]
-  {:type  :node/ribbon
-   :label label
-   :id    id})
+(defn ribbon
+  ([id]
+   {:type  :node/ribbon
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/ribbon
+    :id    id
+    :label label}))
 
-(defn rhombus [& {:keys [label id]
-                  :or   {label " " id nil}}]
-  {:type  :node/rhombus
-   :label label
-   :id    id})
+(defn rhombus
+  ([id]
+   {:type  :node/rhombus
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/rhombus
+    :id    id
+    :label label}))
 
-(defn hexagon [& {:keys [label id]
-                  :or   {label " " id nil}}]
-  {:type  :node/hexagon
-   :label label
-   :id    id})
+(defn hexagon
+  ([id]
+   {:type  :node/hexagon
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/hexagon
+    :id    id
+    :label label}))
 
-(defn slanted [& {:keys [label id]
-                  :or   {label " " id nil}}]
-  {:type  :node/slanted
-   :label label
-   :id    id})
+(defn slanted
+  ([id]
+   {:type  :node/slanted
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/slanted
+    :id    id
+    :label label}))
 
-(defn slanted-alt [& {:keys [label id]
-                      :or   {label " " id nil}}]
-  {:type  :node/slanted-alt
-   :label label
-   :id    id})
+(defn slanted-alt
+  ([id]
+   {:type  :node/slanted-alt
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/slanted-alt
+    :id    id
+    :label label}))
 
-(defn trapezoid [& {:keys [label id]
-                    :or   {label " " id nil}}]
-  {:type  :node/trapezoid
-   :label label
-   :id    id})
+(defn trapezoid
+  ([id]
+   {:type  :node/trapezoid
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/trapezoid
+    :id    id
+    :label label}))
 
-(defn trapezoid-alt [& {:keys [label id]
-                        :or   {label " " id nil}}]
-  {:type  :node/trapezoid-alt
-   :label label
-   :id    id})
+(defn trapezoid-alt
+  ([id]
+   {:type  :node/trapezoid-alt
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/trapezoid-alt
+    :id    id
+    :label label}))
 
-(defn double-circle [& {:keys [label id]
-                        :or   {label " " id nil}}]
-  {:type  :node/double-circle
-   :label label
-   :id    id})
+(defn double-circle
+  ([id]
+   {:type  :node/double-circle
+    :id    id
+    :label " "})
+  ([id label]
+   {:type  :node/double-circle
+    :id    id
+    :label label}))
 
 ;; ============ links ============
 
-(defn line [from to
-            {:keys [length message]
-             :or   {length 1 message " "}}]
-  {:type    :line/normal
-   :from    from
-   :to      to
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn line
+  ([from to]
+   {:type    :line/normal
+    :from    from
+    :to      to
+    :message " "
+    :length  1})
+  ([from to message]
+   {:type    :line/normal
+    :from    from
+    :to      to
+    :message message
+    :length  1})
+  ([from to length]
+   {:type    :line/normal
+    :from    from
+    :to      to
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
 (defn arrow [from to
-             {:keys [length message head]
-              :or   {length 1 message " " head :normal}}]
+             & {:keys [length message head]
+                :or   {length 1 message " " head :normal}}]
   {:type    :arrow/normal
    :from    from
    :to      to
@@ -112,8 +179,8 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn thick-line [from to
-                  {:keys [length message]
-                   :or   {length 1 message " "}}]
+                  & {:keys [length message]
+                     :or   {length 1 message " "}}]
   {:type    :line/thick
    :from    from
    :to      to
@@ -122,8 +189,8 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn thick-arrow [from to
-                   {:keys [length message head]
-                    :or   {length 1 message " " head :normal}}]
+                   & {:keys [length message head]
+                      :or   {length 1 message " " head :normal}}]
   {:type    :arrow/thick
    :from    from
    :to      to
@@ -133,8 +200,8 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn dotted-line [from to
-                   {:keys [length message]
-                    :or   {length 1 message " "}}]
+                   & {:keys [length message]
+                      :or   {length 1 message " "}}]
   {:type    :line/dotted
    :from    from
    :to      to
@@ -143,8 +210,8 @@
                 (throw (IllegalArgumentException. "Invalid length")))})
 
 (defn dotted-arrow [from to
-                    {:keys [length message head]
-                     :or   {length 1 message " " head :normal}}]
+                    & {:keys [length message head]
+                       :or   {length 1 message " " head :normal}}]
   {:type    :arrow/dotted
    :from    from
    :to      to
@@ -327,19 +394,18 @@
        (string/join)))
 
 (defn render-position [indent-level position]
-  ;; TODO this might need a rewrite.
   (let [type   (name (position :type))
         indent (make-indent indent-level)]
     (str indent
          (match [type]
            ["chain-links"]
            (let [links          (:links position)
-                 rendered-links (map render links)]
+                 rendered-links (map (partial render-with-indent (+ indent-level 4)) links)]
              (str (first rendered-links)
                   (string/join (map truncate-link (rest rendered-links)))))
            ["parallel-links"]
            (let [links (:links position)]
-             (string/join " & " (map render links)))
+             (string/join " & " (map (partial render-with-indent (+ indent-level 4)) links)))
            ["parallel-nodes"]
            (let [node-colls (:node-colls position)]
              (string/join (str " " (render-arrow arrow) " ")
@@ -388,11 +454,27 @@
 
 ;; ============ main ============
 
-(defn flowchart
+(defn flow-chart
   "Make a Flowchart."
   [direction & forms]
   (str "flowchart" (name direction)
        (string/join (interpose "\n" (mapv render forms)))))
+
+(comment "========================================"
+  (render (arrow (node "Start") (rhombus "Is it?")))
+
+  (flow-chart :TD
+              (let [A (node "Start")
+                    B (rhombus "Is it?")
+                    C (node "OK")
+                    D (node "Rethink")
+                    E (node "End")]
+                (arrow A B)
+                (arrow B C :message "Yes")
+                (arrow C D)
+                (arrow D B)
+                (arrow B E :message "No")))
+  )
 
 ;; Declaring shapes and adding messages are coupled together...
 ;; => using a **clojure let block** would solve the problem elegantly.
