@@ -159,7 +159,7 @@
     :to      to
     :message message
     :length  1})
-  ([from to length]
+  ([from to message length]
    {:type    :line/normal
     :from    from
     :to      to
@@ -167,58 +167,140 @@
     :length  (if (<= 0 length 3) length
                  (throw (IllegalArgumentException. "Invalid length")))}))
 
-(defn arrow [from to
-             & {:keys [length message head]
-                :or   {length 1 message " " head :normal}}]
-  {:type    :arrow/normal
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn arrow
+  ([from to]
+   {:type    :arrow/normal
+    :from    from
+    :to      to
+    :head    :normal
+    :message " "
+    :length  1})
+  ([from to head]
+   {:type    :arrow/normal
+    :from    from
+    :to      to
+    :head    head
+    :message " "
+    :length  1})
+  ([from to head message]
+   {:type    :arrow/normal
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  1})
+  ([from to head message length]
+   {:type    :arrow/normal
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
-(defn thick-line [from to
-                  & {:keys [length message]
-                     :or   {length 1 message " "}}]
-  {:type    :line/thick
-   :from    from
-   :to      to
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn thick-line
+  ([from to]
+   {:type    :line/thick
+    :from    from
+    :to      to
+    :message " "
+    :length  1})
+  ([from to message]
+   {:type    :line/thick
+    :from    from
+    :to      to
+    :message message
+    :length  1})
+  ([from to message length]
+   {:type    :line/thick
+    :from    from
+    :to      to
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
-(defn thick-arrow [from to
-                   & {:keys [length message head]
-                      :or   {length 1 message " " head :normal}}]
-  {:type    :arrow/thick
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn thick-arrow
+  ([from to]
+   {:type    :arrow/thick
+    :from    from
+    :to      to
+    :head    :normal
+    :message " "
+    :length  1})
+  ([from to head]
+   {:type    :arrow/thick
+    :from    from
+    :to      to
+    :head    head
+    :message " "
+    :length  1})
+  ([from to head message]
+   {:type    :arrow/thick
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  1})
+  ([from to head message length]
+   {:type    :arrow/thick
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
-(defn dotted-line [from to
-                   & {:keys [length message]
-                      :or   {length 1 message " "}}]
-  {:type    :line/dotted
-   :from    from
-   :to      to
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn dotted-line
+  ([from to]
+   {:type    :line/dotted
+    :from    from
+    :to      to
+    :message " "
+    :length  1})
+  ([from to message]
+   {:type    :line/dotted
+    :from    from
+    :to      to
+    :message message
+    :length  1})
+  ([from to message length]
+   {:type    :line/dotted
+    :from    from
+    :to      to
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
-(defn dotted-arrow [from to
-                    & {:keys [length message head]
-                       :or   {length 1 message " " head :normal}}]
-  {:type    :arrow/dotted
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  (if (<= 0 length 3) length
-                (throw (IllegalArgumentException. "Invalid length")))})
+(defn dotted-arrow
+  ([from to]
+   {:type    :arrow/dotted
+    :from    from
+    :to      to
+    :head    :normal
+    :message " "
+    :length  1})
+  ([from to head]
+   {:type    :arrow/dotted
+    :from    from
+    :to      to
+    :head    head
+    :message " "
+    :length  1})
+  ([from to head message]
+   {:type    :arrow/dotted
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  1})
+  ([from to head message length]
+   {:type    :arrow/dotted
+    :from    from
+    :to      to
+    :head    head
+    :message message
+    :length  (if (<= 0 length 3) length
+                 (throw (IllegalArgumentException. "Invalid length")))}))
 
 ;; ============ predicates ============
 
