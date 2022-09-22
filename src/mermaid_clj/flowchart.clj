@@ -167,6 +167,10 @@
 (defn link? [form]
   (or (link? form) (arrow? form)))
 
+(defn js-label? [form]
+  (let [type (name (:type form))]
+    (or (= type "call") (= type "href"))))
+
 ;; ============ positions ============
 
 (defn chain-links [& links]
@@ -196,6 +200,21 @@
 (defn direction [direction]
   {:type      :label/direction
    :direction :direction})
+
+(defn call-on-click [node callback-name message]
+  {:type     :label/call
+   :node     node
+   :callback callback-name
+   :message  message})
+
+(defn href-on-click [node href message
+                     & {:keys [open-in]
+                        :or   {open-in ""}}]
+  {:type    :label/href
+   :node    node
+   :href    href
+   :message message
+   :open-in open-in})
 
 ;; ============ renderer ============
 
@@ -336,6 +355,25 @@
          (string/join "\n" (map (partial render-with-indent (+ )) following-forms))
          "\nend")))
 
+(defn render-js-label [indent-level js-label]
+  (let [type    (name (:type js-label))
+        node    (:node js-label)
+        message (:message js-label)]
+    (match [type]
+      ["call"]
+      (let [callback-name (:callback js-label)]
+        (str "click" " " callback-name " " "\"" message "\""))
+      ["href"]
+      (let [href    (:href js-label)
+            open-in (:open-in js-label)]
+        (str "click" " " node " " href "\"" message "\"")))))
+
+(defn render-label [indent-level label]
+  (let [indent (make-indent indent-level)]
+    (if (js-label? label)
+      (render-js-label indent-level label)
+      (str "direction" " " (name (:direction label))))))
+
 (defn- dispatch-renderer [form]
   (match [(namespace (node :type))]
     ["node"]     render-node
@@ -353,7 +391,7 @@
 (defn flowchart
   "Make a Flowchart."
   [direction & forms]
-  (str (name direction)
+  (str "flowchart" (name direction)
        (string/join (interpose "\n" (mapv render forms)))))
 
 ;; Declaring shapes and adding messages are coupled together...
