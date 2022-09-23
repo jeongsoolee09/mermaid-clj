@@ -4,142 +4,150 @@
 
 ;; ============ nodes ============
 
+(def id-maker
+  ;; WARNING This is a stateful function
+  (let [number (atom 0)]
+    (fn []
+      (do
+        (swap! number inc)
+        (str "id" @number)))))
+
 (defn node
-  ([id]
+  ([label]
    {:type  :node/normal
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/normal
     :id    id
     :label label}))
 
 (defn round-edge
-  ([id]
+  ([label]
    {:type  :node/round-edge
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/round-edge
     :id    id
     :label label}))
 
 (defn pill
-  ([id]
+  ([label]
    {:type  :node/pill
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/pill
     :id    id
     :label label}))
 
 (defn subroutine
-  ([id]
+  ([label]
    {:type  :node/subroutine
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/subroutine
     :id    id
     :label label}))
 
 (defn database
-  ([id]
+  ([label]
    {:type  :node/database
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/database
     :id    id
     :label label}))
 
 (defn circle
-  ([id]
+  ([label]
    {:type  :node/circle
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/circle
     :id    id
     :label label}))
 
 (defn ribbon
-  ([id]
+  ([label]
    {:type  :node/ribbon
-    :id    id
-    :label " "})
-  ([id label]
+    :id     (id-maker)
+    :label  label})
+  ([label id]
    {:type  :node/ribbon
     :id    id
     :label label}))
 
 (defn rhombus
-  ([id]
+  ([label]
    {:type  :node/rhombus
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/rhombus
     :id    id
     :label label}))
 
 (defn hexagon
-  ([id]
+  ([label]
    {:type  :node/hexagon
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/hexagon
     :id    id
     :label label}))
 
 (defn slanted
-  ([id]
+  ([label]
    {:type  :node/slanted
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/slanted
     :id    id
     :label label}))
 
 (defn slanted-alt
-  ([id]
+  ([label]
    {:type  :node/slanted-alt
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/slanted-alt
     :id    id
     :label label}))
 
 (defn trapezoid
-  ([id]
+  ([label]
    {:type  :node/trapezoid
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/trapezoid
     :id    id
     :label label}))
 
 (defn trapezoid-alt
-  ([id]
+  ([label]
    {:type  :node/trapezoid-alt
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/trapezoid-alt
     :id    id
     :label label}))
 
 (defn double-circle
-  ([id]
+  ([label]
    {:type  :node/double-circle
-    :id    id
-    :label " "})
-  ([id label]
+    :id    (id-maker)
+    :label label})
+  ([label id]
    {:type  :node/double-circle
     :id    id
     :label label}))
@@ -370,14 +378,6 @@
 (declare render-with-indent)
 (declare dispatch-renderer)
 
-(def id-maker
-  ;; WARNING This is a stateful function
-  (let [number (atom 0)]
-    (fn []
-      (do
-        (swap! number inc)
-        (str "id" @number)))))
-
 (defn make-indent [indent]
   (string/join (for [_ (range indent)] " ")))
 
@@ -385,8 +385,8 @@
   "Render a single node."
   [indent-level node]
   (let [type   (name (node :type))
-        id     (if (node :id) (node :id) (id-maker))
-        label  (node :label)
+        id     (name (node :id))
+        label  (name (node :label))
         indent (make-indent indent-level)]
     (str indent
          (match [type]
@@ -436,37 +436,37 @@
 
 (defn render-arrow
   "Render a arrow, together with its including nodes."
-  [indent-level arrow]
-  (let [type    (name (arrow :type))
-        from    (name (arrow :from))
-        to      (name (arrow :to))
-        head    (arrow-head->string (name (arrow :head)))
-        length  (name (arrow :length))
-        message (name (arrow :message))
+  [indent-level arrow-]
+  (let [type    (name (arrow- :type))
+        from    (render-with-indent 0 (arrow- :from))
+        to      (render-with-indent 0 (arrow- :to))
+        head    (arrow-head->string (name (arrow- :head)))
+        length  (arrow- :length)
+        message (name (arrow- :message))
         indent  (make-indent indent-level)]
     (str indent
          (match [type]
-           ["normal"] (str from (iter-string (+ length 1) "-") head
-                           "|" message "|" to)
-           ["thick"]  (str from (iter-string (+ length 1) "=") head
-                           "|" message "|" to)
-           ["dotted"] (str from "-" (iter-string (+ length 1) ".") "-" head
-                           "|" message "|" to)))))
+           ["normal"] (str from " " (iter-string (+ length 1) "-") head
+                           "|" message "|" " " to)
+           ["thick"]  (str from " " (iter-string (+ length 1) "=") head
+                           "|" message "|" " " to)
+           ["dotted"] (str from " " "-" (iter-string (+ length 1) ".") "-" head
+                           "|" message "|" " "to)))))
 
 (defn render-link
   "Render a link, together with its including nodes."
   [indent-level link]
-  (let [type    (namespace (arrow :type))
-        subtype (name (arrow :type))
-        from    (name (arrow :from))
-        to      (name (arrow :to))
-        length  (name (arrow :length))
-        message (name (arrow :message))
+  (let [type    (namespace (link :type))
+        subtype (name (link :type))
+        from    (render-with-indent 0 (link :from))
+        to      (render-with-indent 0 (link :to))
+        length  (link :length)
+        message (name (link :message))
         indent  (make-indent indent-level)]
     (str indent
          (match [type]
-           ["line"]  (render-line  indent-level subtype from to length message)
-           ["arrow"] (render-arrow indent-level subtype from to length message)))))
+           ["line"]  (render-line  indent-level link)
+           ["arrow"] (render-arrow indent-level link)))))
 
 (defn- truncate-link [rendered-link]
   (->> rendered-link
@@ -482,15 +482,15 @@
          (match [type]
            ["chain-links"]
            (let [links          (:links position)
-                 rendered-links (map (partial render-with-indent (+ indent-level 4)) links)]
+                 rendered-links (map (partial render-link (+ indent-level 4)) links)]
              (str (first rendered-links)
                   (string/join (map truncate-link (rest rendered-links)))))
            ["parallel-links"]
            (let [links (:links position)]
-             (string/join " & " (map (partial render-with-indent (+ indent-level 4)) links)))
+             (string/join " & " (map (partial render-link (+ indent-level 4)) links)))
            ["parallel-nodes"]
            (let [node-colls (:node-colls position)]
-             (string/join (str " " (render-arrow arrow) " ")
+             (string/join (str " " (render-arrow 0 arrow) " ")
                           (map (partial string/join " & ")
                                (map render-node node-colls))))))))
 
@@ -523,9 +523,10 @@
       (str "direction" " " (name (:direction label))))))
 
 (defn- dispatch-renderer [form]
-  (match [(namespace (node :type))]
+  (match [(namespace (form :type))]
     ["node"]     render-node
-    ["link"]     render-link
+    ["line"]     render-link
+    ["arrow"]    render-link
     ["position"] render-position))
 
 (defn- render-with-indent [indent-level form]
@@ -543,7 +544,19 @@
        (string/join (interpose "\n" (mapv render forms)))))
 
 (comment "========================================"
-  (render (arrow (node "Start") (rhombus "Is it?")))
+  (render (node "Start"))
+  (render (rhombus "Start"))
+  (render (arrow (node "Start") (node "Is it?")))
+
+  (def sample-arrow (arrow (node "Start") (node "Is it?")))
+  (def sample-arrow (arrow (node "Start") (circle "Is it?") :round "hoihoi"))
+
+  (render sample-arrow)
+
+  (def form sample-arrow)
+
+  ;; TODO
+  (render-arrow 0 sample-arrow)
 
   (flow-chart :TD
               (let [A (node "Start")
@@ -555,11 +568,10 @@
                 (arrow B C :message "Yes")
                 (arrow C D)
                 (arrow D B)
-                (arrow B E :message "No")))
-  )
+                (arrow B E :message "No"))))
 
 ;; Declaring shapes and adding messages are coupled together...
-;; => using a **clojure let block** would solve the problem elegantly.
+;; => using a clojure `let` block would solve the problem elegantly.
 ;; => what's the point of using an embedded DSL when you can't use the host language
 ;;    to write the desired software?
 
