@@ -547,17 +547,10 @@
   (render (node "Start"))
   (render (rhombus "Start"))
   (render (arrow (node "Start") (node "Is it?")))
-
-  (def sample-arrow (arrow (node "Start") (node "Is it?")))
-  (def sample-arrow (arrow (node "Start") (circle "Is it?") :round "hoihoi"))
-
-  (render sample-arrow)
-
-  (def form sample-arrow)
+  (render (arrow (node "Start") (node "Is it?")))
+  (render (arrow (node "Start") (circle "Is it?") :round "hoihoi"))
 
   ;; TODO
-  (render-arrow 0 sample-arrow)
-
   (flow-chart :TD
               (let [A (node "Start")
                     B (rhombus "Is it?")
@@ -565,10 +558,10 @@
                     D (node "Rethink")
                     E (node "End")]
                 (arrow A B)
-                (arrow B C :message "Yes")
+                (arrow B C :normal "Yes")
                 (arrow C D)
                 (arrow D B)
-                (arrow B E :message "No"))))
+                (arrow B E :normal "No"))))
 
 ;; Declaring shapes and adding messages are coupled together...
 ;; => using a clojure `let` block would solve the problem elegantly.
