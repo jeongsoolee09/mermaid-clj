@@ -6,7 +6,7 @@ This fork aims to:
 - Update the original to the current Sequence Diagrams, and
 - Extend the domain to other diagrams, such as Flowcharts, Class Diagrams, and more.
 
-# Usage
+## Usage
 
 The following DSL program translates to:
 

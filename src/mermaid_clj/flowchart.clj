@@ -2,7 +2,7 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]))
 
-;; ============ nodes ============
+;; ================ nodes ================
 
 (defn node [& {:keys [label id]
                :or   {label " " id nil}}]
@@ -88,7 +88,7 @@
    :label label
    :id    id})
 
-;; ============ links ============
+;; ================ links ================
 
 (defn line [from to
             {:keys [length message]
@@ -153,7 +153,7 @@
    :length  (if (<= 0 length 3) length
                 (throw (IllegalArgumentException. "Invalid length")))})
 
-;; ============ predicates ============
+;; ================ predicates ================
 
 (defn node? [form]
   (= "node" (namespace (:type form))))
@@ -167,7 +167,7 @@
 (defn link? [form]
   (or (link? form) (arrow? form)))
 
-;; ============ positions ============
+;; ================ positions ================
 
 (defn chain-links [& links]
   {:type  :position/chain-links
@@ -182,16 +182,34 @@
    :arrow      arrow
    :node-colls node-colls})
 
-;; ============ subgraph ============
+;; ================ subgraph ================
 
-(defn subgraph [name & forms])
+(defn subgraph
+  ([name & forms]
+   {:type  :subgraph
+    :name  name
+    :id    nil
+    :forms forms})
+  ([name id & forms]
+   {:type  :subgraph
+    :name  name
+    :id    id
+    :forms forms}))
 
-;; ============ renderer ============
+(defn direction [direction]
+  {:type      :label/direction
+   :direction direction})
+
+(defn js-event [event]
+  ;; TODO
+  )
+
+;; ================ renderer ================
 
 (declare render)
 (declare dispatch-renderer)
 
-(def id-maker
+(def ^:private id-maker
   ;; WARNING This is a stateful function
   (let [number (atom 0)]
     (fn []
@@ -199,7 +217,7 @@
         (swap! number inc)
         (str "id" @number)))))
 
-(defn render-node
+(defn- render-node
   "Render a single node."
   [node]
   (let [type  (name (node :type))
@@ -237,7 +255,7 @@
 (defn- iter-string [num string]
   (string/join (repeat num string)))
 
-(defn render-line
+(defn- render-line
   "Render a line, together with its including nodes."
   [line]
   (let [type    (name (line :type))
@@ -263,7 +281,7 @@
     :else    (throw (IllegalArgumentException.
                       (name arrow-head)))))
 
-(defn render-arrow
+(defn- render-arrow
   "Render a arrow, together with its including nodes."
   [arrow]
   (let [type    (name (arrow :type))
@@ -282,7 +300,7 @@
           (str from "-" (iter-string (+ length 1) ".") "-" head
                "|" message "|" to))))
 
-(defn render-link
+(defn- render-link
   "Render a link, together with its including nodes."
   [link]
   (let [type    (namespace (arrow :type))
@@ -299,12 +317,11 @@
 (defn- truncate-link [rendered-link]
   (string/join (drop-while #(not= \space %) (seq rendered-link))))
 
-(defn render-position [position]
-  ;; TODO this might need a rewrite.
+(defn- render-position [position]
   (let [type (name (position :type))]
     (cond (= type "chain-links")
           (let [links          (:links position)
-                rendered-links (map render links)]
+                rendered-links (map render-link links)]
             (str (first rendered-links)
                  (string/join (map truncate-link (rest rendered-links)))))
           (= type "parallel-links")
@@ -322,13 +339,15 @@
           (= type "link")     render-link
           (= type "position") render-position)))
 
+;; (defn- sub)
+
 (defn- render-with-indent [indent-level form]
   (trampoline (partial (dispatch-renderer form) indent-level) form))
 
-(defn render [form]
+(defn- render [form]
   (render-with-indent 4 form))
 
-;; ============ main ============
+;; ================ main ================
 
 (defn flowchart
   "Make a Flowchart."

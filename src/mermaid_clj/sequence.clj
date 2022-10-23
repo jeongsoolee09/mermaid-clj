@@ -22,8 +22,9 @@
     [false true] (str arrow-str "-")
     [true true] (throw (IllegalArgumentException.))))
 
-(defn arrow->str [arrow]
+(defn arrow->str
   "Get the arrow representation of a given arrow."
+  [arrow]
   (let [type1      (namespace (arrow :type))
         type2      (name (arrow :type))
         activate   (arrow :activate)
