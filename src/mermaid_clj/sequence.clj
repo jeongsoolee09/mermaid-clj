@@ -337,7 +337,7 @@
   (if (>= 0 (count (:following-forms complex-block))) (throw (IllegalArgumentException.))
       (letfn [(handle-first [indent-level complex-block]
                 (let [first-clause (first (:following-forms complex-block))
-                      indent     (make-indent indent-level)]
+                      indent       (make-indent indent-level)]
                   (string/join
                     (flatten [indent block-name " " (first first-clause) "\n"
                               (interpose "\n" (mapv (partial render-with-indent
