@@ -11,174 +11,61 @@
         (swap! number inc)
         (str "id" @number)))))
 
-(defn node
-  ([label]
-   {:type  :node/normal
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/normal
-    :id    id
-    :label label}))
+(defn node-maker [node-type]
+  (fn 
+    ([label]
+     {:type  (keyword (str "node/" (name node-type)))
+      :id    (id-maker)
+      :label (name label)})
+    ([label id]
+     {:type  :node/normal
+      :id    (id-maker)
+      :label (name label)})))
 
-(defn round-edge
-  ([label]
-   {:type  :node/round-edge
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/round-edge
-    :id    id
-    :label label}))
-
-(defn pill
-  ([label]
-   {:type  :node/pill
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/pill
-    :id    id
-    :label label}))
-
-(defn subroutine
-  ([label]
-   {:type  :node/subroutine
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/subroutine
-    :id    id
-    :label label}))
-
-(defn database
-  ([label]
-   {:type  :node/database
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/database
-    :id    id
-    :label label}))
-
-(defn circle
-  ([label]
-   {:type  :node/circle
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/circle
-    :id    id
-    :label label}))
-
-(defn ribbon
-  ([label]
-   {:type  :node/ribbon
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/ribbon
-    :id    id
-    :label label}))
-
-(defn rhombus
-  ([label]
-   {:type  :node/rhombus
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/rhombus
-    :id    id
-    :label label}))
-
-(defn hexagon
-  ([label]
-   {:type  :node/hexagon
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/hexagon
-    :id    id
-    :label label}))
-
-(defn slanted
-  ([label]
-   {:type  :node/slanted
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/slanted
-    :id    id
-    :label label}))
-
-(defn slanted-alt
-  ([label]
-   {:type  :node/slanted-alt
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/slanted-alt
-    :id    id
-    :label label}))
-
-(defn trapezoid
-  ([label]
-   {:type  :node/trapezoid
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/trapezoid
-    :id    id
-    :label label}))
-
-(defn trapezoid-alt
-  ([label]
-   {:type  :node/trapezoid-alt
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/trapezoid-alt
-    :id    id
-    :label label}))
-
-(defn double-circle
-  ([label]
-   {:type  :node/double-circle
-    :id    (id-maker)
-    :label label})
-  ([label id]
-   {:type  :node/double-circle
-    :id    id
-    :label label}))
+(defn node (node-maker :normal))
+(defn round-edge (node-maker :round-edge))
+(defn pill (node-maker :pill))
+(defn subroutine (node-maker :subroutine))
+(defn database (node-maker :database))
+(defn circle (node-maker :circle))
+(defn ribbon (node-maker :ribbon))
+(defn rhombus (node-maker :rhombus))
+(defn hexagon (node-maker :hexagon))
+(defn slanted (node-maker :slanted))
+(defn slanted-alt (node-maker :slanted-alt))
+(defn trapezoid (node-maker :trapezoid))
+(defn trapezoid-alt (node-maker :trapezoid-alt))
+(defn double-circle (node-maker :double-circle))
 
 ;; ================ links ================
 
-(defn line
-  [from to & {:keys [message length]
-              :or   {message " " length 1}}]
-   {:type    :line/normal
-    :from    from
-    :to      to
-    :message message
-    :length  length})
+(defn line-maker [line-style]
+  (fn [from to & {:keys [message length]
+                  :or   {message " " length 1}}]
+    {:type    (keyword (str "line/" (name node-type)))
+     :from    from
+     :to      to
+     :message message
+     :length  length}))
 
-(defn thick-line
-  [from to & {:keys [message length]
-              :or   {message " " length 1}}]
-   {:type    :line/thick
-    :from    from
-    :to      to
-    :message message
-    :length  length})
+(def line (line-maker :normal))
+(def thick-line (line-maker :thick))
+(def dotted-line (line-maker :dotted))
 
-(defn dotted-line
-  [from to & {:keys [message length]
-              :or   {message " " length 1}}]
-  {:type    :line/dotted
-   :from    from
-   :to      to
-   :message message
-   :length  length})
+
+(defn arrow-maker [arrow-style]
+  (fn [from to & {:keys [head message length]
+                  :or   {head :arrow/normal message " " length 1}}]
+    {:type    arrow-style
+     :from    from
+     :to      to
+     :head    head
+     :message message
+     :length  length}))
+
+(defn arrow (arrow-maker :normal))
+(defn thick-arrow (arrow-maker :thick))
+(defn dotted-arrow (arrow-maker :dotted))
 
 (defn invisible
   [from to]
@@ -187,36 +74,6 @@
    :to      to
    :message " "
    :length  1})
-
-(defn arrow
-  [from to & {:keys [head message length]
-              :or   {head :arrow/normal message " " length 1}}]
-  {:type    :arrow/normal
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  length})
-
-(defn thick-arrow
-  [from to & {:keys [head message length]
-              :or   {head :arrow/normal message " " length 1}}]
-  {:type    :arrow/thick
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  length})
-
-(defn dotted-arrow
-  [from to & {:keys [head message length]
-              :or   {head :arrow/normal message " " length 1}}]
-  {:type    :arrow/dotted
-   :from    from
-   :to      to
-   :head    head
-   :message message
-   :length  length})
 
 ;; ================ predicates ================
 
