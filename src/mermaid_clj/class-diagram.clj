@@ -22,12 +22,12 @@
 (def service-class (class-builder :class/service))
 (def enum (class-builder :class/enum))
 
-(def attributes [& forms]
-  {:type :attributes
+(defn attributes [& forms]
+  {:type  :attributes
    :forms forms})
 
-(def methods [& forms]
-  {:type :methods
+(defn methods [& forms]
+  {:type  :methods
    :forms forms})
 
 ;; ================ members ================
