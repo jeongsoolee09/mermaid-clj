@@ -152,10 +152,10 @@
 (defn- render-node
   "Render a single node."
   [indent-level node]
-  (let [type   (name (node :type))
-        id     (name (node :id))
-        label  (name (node :label))
-        indent (make-indent indent-level)]
+  (let [{:keys
+         [type id label]} node
+        type              (name type)
+        indent            (make-indent indent-level)]
     (str indent
          (condp = type
            "normal"        (str id   "[" label "]")
@@ -179,12 +179,10 @@
 (defn- render-line
   "Render a line, together with its including nodes."
   [indent-level line]
-  (let [type    (name (line :type))
-        from    (name (line :from))
-        to      (name (line :to))
-        length  (name (line :length))
-        message (name (line :message))
-        indent  (make-indent indent-level)]
+  (let [{:keys
+         [type from to
+          length message]} line
+        indent             (make-indent indent-level)]
     (str indent
          (condp = type
            "normal" (str from (iter-string (+ length 2) "-")
@@ -204,13 +202,13 @@
 
 (defn- render-arrow
   "Render a arrow, together with its including nodes."
-  [indent-level arrow-]
-  (let [type    (name (arrow- :type))
-        from    (render-with-indent 0 (arrow- :from))
-        to      (render-with-indent 0 (arrow- :to))
-        head    (arrow-head->string (name (arrow- :head)))
-        length  (arrow- :length)
-        message (name (arrow- :message))
+  [indent-level arrow]
+  (let [type    (name (arrow :type))
+        from    (render-with-indent 0 (arrow :from))
+        to      (render-with-indent 0 (arrow :to))
+        head    (arrow-head->string (name (arrow :head)))
+        length  (arrow :length)
+        message (name (arrow :message))
         indent  (make-indent indent-level)]
     (str indent
          (condp = type
@@ -320,7 +318,6 @@
          (render (arrow (node "Start") (node "Is it?")))
          (render (arrow (node "Start") (circle "Is it?") :message "hoihoi"))
 
-         ;; TODO
          (println
            (let [A (node "Start")
                  B (rhombus "Is it?")
