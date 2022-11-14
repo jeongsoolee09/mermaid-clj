@@ -24,26 +24,31 @@
            (methods
              (private 'run)))))
 
+;; ================ classes ================
 
-(defn class [name & forms])
+(defn class-builder [class-kind]
+  (fn [name & forms]
+    {:type  :class
+     :kind  class-kind
+     :id    name
+     :forms forms}))
 
-(defn interface [name & forms])
+(def class (class-builder :class/public))
+(def interface (class-builder :class/interface))
+(def public-class (class-builder :class/public))
+(def private-class (class-builder :class/private))
+(def protected-class (class-builder :class/protected))
+(def abstract-class (class-builder :class/abstract))
+(def service-class (class-builder :class/service))
+(def enum (class-builder :class/enum))
 
-(defn abstract-class [name & forms])
+(def attributes [& forms]
+  {:type :attributes
+   :forms forms})
 
-(defn service-class [name & forms])
-
-(defn public-class [name & forms])
-
-(defn private-class [name & forms])
-
-(defn protected-class [name & forms])
-
-(defn enum [name & members])
-
-(defn attributes [& forms])
-
-(defn methods [& forms])
+(def methods [& forms]
+  {:type :methods
+   :forms forms})
 
 ;; ================ members ================
 
@@ -65,19 +70,18 @@
       :id      method-name
       :args    args})))
 
-(def public (member-builder :member/public))
-(def private (member-builder :member/private))
+(def public    (member-builder :member/public))
+(def private   (member-builder :member/private))
 (def protected (member-builder :member/protected))
-(def internal (member-builder :member/internal))
-(def abstract (member-builder :member/abstract))
-(def static (member-builder :member/static))
+(def internal  (member-builder :member/internal))
+(def abstract  (member-builder :member/abstract))
+(def static    (member-builder :member/static))
 
-(defn extends [subclass superclass & {:keys [head direction relationship]
-                                      :or   {head         ""
-                                             direction    :RL ; :LR :RL :TW
-                                             relationship :inherit}}]
-  
-  )
+(defn extends [subclass superclass
+               & {:keys [head direction relationship]
+                  :or   {head         ""
+                         direction    :RL ; :LR :RL :TW
+                         relationship :inherit}}])
 
 (defn class-diagram [])
 
