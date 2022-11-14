@@ -458,63 +458,24 @@
 (defn flow-chart
   "Make a Flowchart."
   [direction & forms]
-  (str "flowchart" (name direction)
-       (string/join (interpose "\n" (mapv render forms)))))
+  (str "flowchart" " " (name direction)
+       (string/join (interpose "\n" (map render forms)))))
 
 (comment "========================================"
          (render (node "Start"))
          (render (rhombus "Start"))
+         (render (arrow (node "Start") (node "Is it?") :message "hihi"))
          (render (arrow (node "Start") (node "Is it?")))
-         (render (arrow (node "Start") (node "Is it?")))
-         (render (arrow (node "Start") (circle "Is it?") :round "hoihoi"))
+         (render (arrow (node "Start") (circle "Is it?") :message "hoihoi"))
 
          ;; TODO
-         (flow-chart :TD
-                     (let [A (node "Start")
-                           B (rhombus "Is it?")
-                           C (node "OK")
-                           D (node "Rethink")
-                           E (node "End")]
-                       (arrow A B)
-                       (arrow B C :normal "Yes")
-                       (arrow C D)
-                       (arrow D B)
-                       (arrow B E :normal "No"))))
+         (let [A (node "Start")
+               B (rhombus "Is it?")
+               C (node "OK")
+               D (node "Rethink")
+               E (node "End")]
 
-;; Declaring shapes and adding messages are coupled together...
-;; => using a clojure `let` block would solve the problem elegantly.
-;; => what's the point of using an embedded DSL when you can't use the host language
-;;    to write the desired software?
-
-;; flowchart TD
-;;     A[Start] --> B{Is it?}
-;;     B -->|Yes| C[OK]
-;;     C --> D[Rethink]
-;;     D --> B
-;;     B ---->|No| E[End]
-
-;; translates to:
-
-;; (flow-chart :TD
-;;    (let [A (node "Start")
-;;          B (rhombus "Is it?")
-;;          C (node "OK")
-;;          D (node "Rethink")
-;;          E (node "End")]
-;;      (arrow A B)
-;;      (arrow B C "Yes")
-;;      (arrow C D)
-;;      (arrow D B)
-;;      (arrow B E "No")))
-
-
-(comment "======================"
-         (flow-chart :TD
-                     (let [A (node "Start")
-                           B (rhombus "Is it?")
-                           C (node "OK")
-                           D (node "Rethink")
-                           E (node "End")]
+           (flow-chart :TD
                        (arrow A B)
                        (arrow B C :message "Yes")
                        (arrow C D)

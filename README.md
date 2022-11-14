@@ -8,7 +8,7 @@ This fork aims to:
 
 ## Usage
 
-The following DSL program translates to:
+### Sequence Diagram
 
 ```clojure
 (sequence-diagram
@@ -25,6 +25,8 @@ The following DSL program translates to:
        ["alice to bob" [(solid-arrow :alice :bob "hihi")]]
        ["bob to alice" [(solid-arrow :bob :alice "hihi")]]))
 ```
+
+The above DSL program translates to:
 
 ```mermaid
 sequenceDiagram
@@ -47,4 +49,32 @@ sequenceDiagram
     and bob to alice
         bob->>alice: hihi
     end
+```
+
+### Flowchart
+
+```clojure
+(let [A (node "Start")
+      B (rhombus "Is it?")
+      C (node "OK")
+      D (node "Rethink")
+      E (node "End")]
+
+  (flow-chart :TD
+    (arrow A B)
+    (arrow B C :message "Yes")
+    (arrow C D)
+    (arrow D B)
+    (arrow B E :message "No")))
+```
+
+The above DSL program translates to:
+
+```mermaid
+flowchart TD    
+    id83[Start] -->| | id84{Is it?}
+    id84{Is it?} -->|Yes| id85[OK]
+    id85[OK] -->| | id86[Rethink]
+    id86[Rethink] -->| | id84{Is it?}
+    id84{Is it?} -->|No| id87[End]
 ```
