@@ -458,7 +458,7 @@
 (defn flow-chart
   "Make a Flowchart."
   [direction & forms]
-  (str "flowchart" " " (name direction)
+  (str "flowchart" " " (name direction) "\n"
        (string/join (interpose "\n" (map render forms)))))
 
 (comment "========================================"
@@ -469,15 +469,16 @@
          (render (arrow (node "Start") (circle "Is it?") :message "hoihoi"))
 
          ;; TODO
-         (let [A (node "Start")
-               B (rhombus "Is it?")
-               C (node "OK")
-               D (node "Rethink")
-               E (node "End")]
+         (println
+           (let [A (node "Start")
+                 B (rhombus "Is it?")
+                 C (node "OK")
+                 D (node "Rethink")
+                 E (node "End")]
 
-           (flow-chart :TD
-                       (arrow A B)
-                       (arrow B C :message "Yes")
-                       (arrow C D)
-                       (arrow D B)
-                       (arrow B E :message "No"))))
+             (flow-chart :TD
+                         (arrow A B)
+                         (arrow B C :message "Yes")
+                         (arrow C D)
+                         (arrow D B)
+                         (arrow B E :message "No")))))
