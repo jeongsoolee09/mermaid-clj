@@ -1,28 +1,8 @@
 (ns mermaid-clj.class-diagram
   (:require [clojure.string :as string]))
 
-
-(comment
-  (class-diagram
-    (extends :Duck :Animal)
-    (extends :Fish :Animal)
-    (extends :Zebra :Animal)
-    (class :Animal
-           (attributes
-             (public :String 'beakColor)) ; type should be keyword
-           (methods
-             (public :void 'swim [])
-             (public :void 'quack [])))
-    (class :Fish
-           (attributes
-             (private :int 'sizeInFeet))
-           (methods
-             (protected :bool 'canEat)))
-    (class :Zebra
-           (attributes
-             (public :bool 'isWild))
-           (methods
-             (private 'run)))))
+(defn type-normalize [type]
+  (string/replace (name :List<Integer>) #"(<|>)" "~" ))
 
 ;; ================ classes ================
 
@@ -66,7 +46,7 @@
       :args    args})
     ([rtntype method-name args]
      {:type    visibility
-      :rtntype rtntype
+      :rtntype (type-normalize rtntype)
       :id      method-name
       :args    args})))
 
@@ -77,14 +57,57 @@
 (def abstract  (member-builder :member/abstract))
 (def static    (member-builder :member/static))
 
+;; ================ relationship ================
+
 (defn extends [subclass superclass
-               & {:keys [head direction relationship]
+               & {:keys [head direction relationship cardinality]
                   :or   {head         ""
                          direction    :RL ; :LR :RL :TW
-                         relationship :inherit}}])
+                         relationship :inheritance
+                         cardinality  :1}}]
+  ;; available cardinalities:
+  ;; :1 :0..1 :1..* :*
+  ;; and :n :0..n :1..n where n>1 integer
+  {:type         extends
+   :subclass     subclass
+   :superclass   superclass
+   :head         head
+   :direction    direction
+   :relationship relationship
+   :cardinality  cardinality})
+
+;; ================ main ================
 
 (defn class-diagram [])
+
+;; ================ render ================
+
+(defn render-with-indent [indent-level form])
+
+(defn render [form])
 
 (comment
   :0..n
   :Square<Shape>)
+
+(comment
+  (class-diagram
+    (extends :Duck :Animal)
+    (extends :Fish :Animal)
+    (extends :Zebra :Animal)
+    (class :Animal
+           (attributes
+             (public :String 'beakColor)) ; type should be keyword
+           (methods
+             (public :void 'swim [])
+             (public :void 'quack [])))
+    (class :Fish
+           (attributes
+             (private :int 'sizeInFeet))
+           (methods
+             (protected :bool 'canEat)))
+    (class :Zebra
+           (attributes
+             (public :bool 'isWild))
+           (methods
+             (private 'run)))))
