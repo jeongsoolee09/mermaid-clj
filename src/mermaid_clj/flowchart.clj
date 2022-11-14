@@ -180,6 +180,14 @@
    :message message
    :length  length})
 
+(defn invisible
+  [from to]
+  {:type    :line/invisible
+   :from    from
+   :to      to
+   :message " "
+   :length  1})
+
 (defn arrow
   [from to & {:keys [head message length]
               :or   {head :arrow/normal message " " length 1}}]
