@@ -9,54 +9,74 @@
     (extends :Zebra :Animal)
     (class :Animal
            (attributes
-             (public :String 'beakColor))
+             (public :String 'beakColor)) ; type should be keyword
            (methods
              (public :void 'swim [])
              (public :void 'quack [])))
-    (class- :Fish
-            (attributes
-              (private :int 'sizeInFeet))
-            (methods
-              (protected :bool 'canEat)))
-    (class- :Zebra
-            (attributes
-              (public :bool 'isWild))
-            (methods
-              (private 'run)))))
+    (class :Fish
+           (attributes
+             (private :int 'sizeInFeet))
+           (methods
+             (protected :bool 'canEat)))
+    (class :Zebra
+           (attributes
+             (public :bool 'isWild))
+           (methods
+             (private 'run)))))
 
-;; type should be keyword
 
-(defn class [])
+(defn class [name & forms])
 
-(defn interface [])
+(defn interface [name & forms])
 
-(defn abstract-class [])
+(defn abstract-class [name & forms])
 
-(defn service-class [])
+(defn service-class [name & forms])
 
-(defn enum [])
+(defn public-class [name & forms])
 
-(defn atrributes [])
+(defn private-class [name & forms])
 
-(defn methods- [])
+(defn protected-class [name & forms])
 
-(defn public [])
+(defn enum [name & members])
 
-(defn private [])
+(defn attributes [& forms])
 
-(defn protected [])
+(defn methods [& forms])
 
-(defn internal [])
+;; ================ members ================
 
-(defn abstract [])
+(defn member-builder [visibility]
+  (fn
+    ([method-name]
+     {:type    visibility
+      :rtntype :void
+      :id      method-name
+      :args    []})
+    ([method-name args]
+     {:type    visibility
+      :rtntype :void
+      :id      method-name
+      :args    args})
+    ([rtntype method-name args]
+     {:type    visibility
+      :rtntype rtntype
+      :id      method-name
+      :args    args})))
 
-(defn static [])
+(def public (member-builder :member/public))
+(def private (member-builder :member/private))
+(def protected (member-builder :member/protected))
+(def internal (member-builder :member/internal))
+(def abstract (member-builder :member/abstract))
+(def static (member-builder :member/static))
 
 (defn extends [subclass superclass & {:keys [head direction relationship]
-                                      :or {head ""
-                                           direction :RL
-                                           relationship :inherit}}]
-  ;; :LR :RL :TW
+                                      :or   {head         ""
+                                             direction    :RL ; :LR :RL :TW
+                                             relationship :inherit}}]
+  
   )
 
 (defn class-diagram [])
