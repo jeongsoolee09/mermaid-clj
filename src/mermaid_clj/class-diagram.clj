@@ -6,21 +6,21 @@
 
 ;; ================ classes ================
 
-(defn class-builder [class-kind]
+(defn class-builder [visibility]
   (fn [name & forms]
     {:type  :class
-     :kind  class-kind
+     :kind  visibility
      :id    name
      :forms forms}))
 
-(def class           (class-builder :class/public)) ; class defaults to public
-(def public-class    (class-builder :class/public))
-(def private-class   (class-builder :class/private))
-(def protected-class (class-builder :class/protected))
-(def abstract-class  (class-builder :class/abstract))
-(def service-class   (class-builder :class/service))
-(def interface       (class-builder :class/interface))
-(def enum            (class-builder :class/enum))
+(def class           (class-builder :public)) ; class defaults to public
+(def public-class    (class-builder :public))
+(def private-class   (class-builder :private))
+(def protected-class (class-builder :protected))
+(def abstract-class  (class-builder :abstract))
+(def service-class   (class-builder :service))
+(def interface       (class-builder :interface))
+(def enum            (class-builder :enum))
 
 (defn attributes [& forms]
   {:type  :attributes
@@ -35,27 +35,30 @@
 (defn member-builder [visibility]
   (fn
     ([method-name]
-     {:type    visibility
+     {:type    :member
+      :kind    visibility
       :rtntype :void
       :id      method-name
       :args    []})
     ([method-name args]
-     {:type    visibility
+     {:type    :member
+      :kind    visibility
       :rtntype :void
       :id      method-name
       :args    args})
     ([rtntype method-name args]
-     {:type    visibility
+     {:type    :member
+      :kind    visibility
       :rtntype (type-normalize rtntype)
       :id      method-name
       :args    args})))
 
-(def public    (member-builder :member/public))
-(def private   (member-builder :member/private))
-(def protected (member-builder :member/protected))
-(def internal  (member-builder :member/internal))
-(def abstract  (member-builder :member/abstract))
-(def static    (member-builder :member/static))
+(def public    (member-builder :public))
+(def private   (member-builder :private))
+(def protected (member-builder :protected))
+(def internal  (member-builder :internal))
+(def abstract  (member-builder :abstract))
+(def static    (member-builder :static))
 
 ;; ================ relationship ================
 
@@ -80,11 +83,11 @@
 
 ;; ================ render ================
 
-(defn render-class [])
+(defn render-class [class])
 
-(defn render-member [])
+(defn render-member [member])
 
-(defn render-extends [])
+(defn render-extends [extends])
 
 (defn dispatch-renderer [form]
   (condp = (namespace (form :type))
@@ -95,7 +98,8 @@
 (defn- render-with-indent [indent-level form]
   (trampoline (partial (dispatch-renderer form) indent-level) form))
 
-(defn- render [form])
+(defn- render [form]
+  (render-with-indent 4 form))
 
 ;; ================ main ================
 
