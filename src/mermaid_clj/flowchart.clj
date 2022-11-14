@@ -22,27 +22,27 @@
       :id    (id-maker)
       :label (name label)})))
 
-(defn node (node-maker :normal))
-(defn round-edge (node-maker :round-edge))
-(defn pill (node-maker :pill))
-(defn subroutine (node-maker :subroutine))
-(defn database (node-maker :database))
-(defn circle (node-maker :circle))
-(defn ribbon (node-maker :ribbon))
-(defn rhombus (node-maker :rhombus))
-(defn hexagon (node-maker :hexagon))
-(defn slanted (node-maker :slanted))
-(defn slanted-alt (node-maker :slanted-alt))
-(defn trapezoid (node-maker :trapezoid))
-(defn trapezoid-alt (node-maker :trapezoid-alt))
-(defn double-circle (node-maker :double-circle))
+(def node (node-maker :normal))
+(def round-edge (node-maker :round-edge))
+(def pill (node-maker :pill))
+(def subroutine (node-maker :subroutine))
+(def database (node-maker :database))
+(def circle (node-maker :circle))
+(def ribbon (node-maker :ribbon))
+(def rhombus (node-maker :rhombus))
+(def hexagon (node-maker :hexagon))
+(def slanted (node-maker :slanted))
+(def slanted-alt (node-maker :slanted-alt))
+(def trapezoid (node-maker :trapezoid))
+(def trapezoid-alt (node-maker :trapezoid-alt))
+(def double-circle (node-maker :double-circle))
 
 ;; ================ links ================
 
 (defn line-maker [line-style]
   (fn [from to & {:keys [message length]
                   :or   {message " " length 1}}]
-    {:type    (keyword (str "line/" (name node-type)))
+    {:type    (keyword (str "line/" (name line-style)))
      :from    from
      :to      to
      :message message
@@ -52,20 +52,19 @@
 (def thick-line (line-maker :thick))
 (def dotted-line (line-maker :dotted))
 
-
 (defn arrow-maker [arrow-style]
   (fn [from to & {:keys [head message length]
                   :or   {head :arrow/normal message " " length 1}}]
-    {:type    arrow-style
+    {:type    (keyword (str "arrow/" (name arrow-style)))
      :from    from
      :to      to
      :head    head
      :message message
      :length  length}))
 
-(defn arrow (arrow-maker :normal))
-(defn thick-arrow (arrow-maker :thick))
-(defn dotted-arrow (arrow-maker :dotted))
+(def arrow (arrow-maker :normal))
+(def thick-arrow (arrow-maker :thick))
+(def dotted-arrow (arrow-maker :dotted))
 
 (defn invisible
   [from to]
@@ -95,18 +94,14 @@
 
 ;; ============ positions ============
 
-(defn chain-links [& links]
-  {:type  :position/chain-links
-   :links links})
+(defn position-maker [position-style]
+  (fn [& links]
+    {:type  (keyword (str "position" (name position-style)))
+     :links links}))
 
-(defn parallel-links [& links]
-  {:type  :position/parallel-links
-   :links links})
-
-(defn parallel-nodes [arrow & node-colls]
-  {:type       :position/parallel-nodes
-   :arrow      arrow
-   :node-colls node-colls})
+(def chain-links (position-maker :chain-links))
+(def parallel-links (position-maker :parallel-links))
+(def parallel-modes (position-maker :parallel-modes))
 
 ;; ================ subgraph ================
 
