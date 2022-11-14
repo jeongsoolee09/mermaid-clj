@@ -221,7 +221,7 @@
 
 ;;; ============ Blocks ============
 
-(defn loop-
+(defn loop
   "Loop block with a label."
   [label & forms]
   {:type            :block/loop
@@ -390,7 +390,7 @@
 (comment "========================================"
   (println (sequence-diagram
              (autonumber)
-             (loop- "until dead"
+             (loop "until dead"
                     (solid-arrow :alice :bob "hihi")
                     (solid-arrow :bob :alice "hoho")
                     (optional "hoho"
