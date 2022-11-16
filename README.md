@@ -3,7 +3,7 @@
 This fork aims to:
 
 - Completely rewrite the original as well as make syntax changes,
-- Update the original to the current Sequence Diagrams, and
+- Update the original to the current Sequence Diagram APIs, and
 - Extend the domain to other diagrams, such as Flowcharts, Class Diagrams, and more.
 
 ## Usage
@@ -12,7 +12,7 @@ This fork aims to:
 
 ```clojure
 (sequence-diagram
-     (loop- "until dead"
+     (loop "until dead"
           (solid-arrow :alice :bob "hihi")
           (solid-arrow :bob :alice "hoho")
           (optional "hoho"

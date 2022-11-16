@@ -90,14 +90,28 @@
   (string/join (for [_ (range indent)] " ")))
 
 (defn- render-class [indent-level class]
-  (let [{:keys [kind id forms]} class
-        indent (make-indent indent-level)]
-    ))
+  (let [{:keys
+         [kind id forms]} class
+        indent            (make-indent indent-level)])
+  ;; TODO
+  )
 
 (defn- render-member [indent-level member]
-  (let [{:keys [kind rtntype id args]} member]))
+  (let [{:keys
+         [kind rtntype
+          id args]} member
+        indent      (make-indent indent-level)])
+  ;; TODO
+  )
 
-(defn- render-extends [indent-level extends])
+(defn- render-extends [indent-level extends]
+  (let [{:keys
+         [kind subclass superclass
+          head direction relationship
+          cardinality]} extends
+        indent          (make-indent indent-level)])
+  ;; TODO
+  )
 
 (defn- dispatch-renderer [form]
   (condp = (name (form :type))
