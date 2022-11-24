@@ -194,7 +194,7 @@
 
 ;;; ============ Blocks ============
 
-(defn loop
+(defn loop-
   "Loop block with a label."
   [label & forms]
   {:type            :block/loop
@@ -211,14 +211,6 @@
 (defn alternative
   "Alternative block with conditions."
   [& condition-and-forms]
-  (use-like-this
-    (alternative
-      ["x=1" [(solid-arrow :a :b "hoho")
-              (dotted-arrow :b :a "hihi")]]
-      ["x=2" [(solid-arrow :a :b "hoho")
-              (dotted-arrow :b :a "hihi")]]
-      ["x=3" [(solid-arrow :a :b "hoho")
-              (dotted-arrow :b :a "hihi")]]))
   {:type            :block/alt
    :following-forms condition-and-forms})
 
@@ -361,17 +353,17 @@
   (str "sequenceDiagram\n" (string/join (interpose "\n" (mapv render forms)))))
 
 (comment "========================================"
-  (println (sequence-diagram
-             (autonumber)
-             (loop "until dead"
-                    (solid-arrow :alice :bob "hihi")
-                    (solid-arrow :bob :alice "hoho")
-                    (optional "hoho"
-                              (solid-arrow :alice :bob "hihi")
-                              (alternative
-                                ["x = 1" [(solid-arrow :alice :bob "hihi")]]
-                                ["x = 2" [(solid-arrow :bob :john "hihi")]]
-                                ["x = 3" [(solid-arrow :john :alice "hihi")]])))
-             (parallel
-               ["alice to bob" [(solid-arrow :alice :bob "hihi")]]
-               ["bob to alice" [(solid-arrow :bob :alice "hihi")]]))))
+         (println (sequence-diagram
+                    (autonumber)
+                    (loop- "until dead"
+                      (solid-arrow :alice :bob "hihi")
+                      (solid-arrow :bob :alice "hoho")
+                      (optional "hoho"
+                                (solid-arrow :alice :bob "hihi")
+                                (alternative
+                                  ["x = 1" [(solid-arrow :alice :bob "hihi")]]
+                                  ["x = 2" [(solid-arrow :bob :john "hihi")]]
+                                  ["x = 3" [(solid-arrow :john :alice "hihi")]])))
+                    (parallel
+                      ["alice to bob" [(solid-arrow :alice :bob "hihi")]]
+                      ["bob to alice" [(solid-arrow :bob :alice "hihi")]]))))
