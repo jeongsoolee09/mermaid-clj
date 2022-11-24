@@ -7,9 +7,8 @@
   ;; WARNING This is a stateful function
   (let [number (atom 0)]
     (fn []
-      (do
-        (swap! number inc)
-        (str "id" @number)))))
+      (swap! number inc)
+      (str "id" @number))))
 
 (defn node-maker [node-type]
   (fn 
@@ -19,7 +18,7 @@
       :label (name label)})
     ([label id]
      {:type  :node/normal
-      :id    (id-maker)
+      :id    id
       :label (name label)})))
 
 (def node (node-maker :normal))
@@ -116,7 +115,7 @@
 
 (defn direction [direction]
   {:type      :label/direction
-   :direction :direction})
+   :direction direction})
 
 (defn call-on-click [node callback-name message]
   {:type     :label/call
@@ -222,13 +221,8 @@
 (defn- render-link
   "Render a link, together with its including nodes."
   [indent-level link]
-  (let [type    (namespace (link :type))
-        subtype (name (link :type))
-        from    (render-with-indent 0 (link :from))
-        to      (render-with-indent 0 (link :to))
-        length  (link :length)
-        message (name (link :message))
-        indent  (make-indent indent-level)]
+  (let [type   (namespace (link :type))
+        indent (make-indent indent-level)]
     (str indent
          (condp = type
            "line"  (render-line  indent-level link)
@@ -258,7 +252,7 @@
            (let [node-colls (:node-colls position)]
              (string/join (str " " (render-arrow 0 arrow) " ")
                           (map (partial string/join " & ")
-                               (map render-node node-colls))))))))
+                               (map (partial render-node (+ indent-level 4)) node-colls))))))))
 
 (defn render-subgraph [indent-level subgraph]
   (let [id              (:id subgraph)
@@ -286,7 +280,7 @@
   (let [indent (make-indent indent-level)]
     (if (js-label? label)
       (render-js-label indent-level label)
-      (str "direction" " " (name (:direction label))))))
+      (str (make-indent indent) "direction" " " (name (:direction label))))))
 
 (defn- dispatch-renderer [form]
   (condp = (namespace (form :type))
@@ -294,8 +288,6 @@
     "line"     render-link
     "arrow"    render-arrow
     "position" render-position))
-
-;; (defn- sub)
 
 (defn- render-with-indent [indent-level form]
   (trampoline (partial (dispatch-renderer form) indent-level) form))
