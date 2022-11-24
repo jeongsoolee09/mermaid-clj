@@ -1,8 +1,5 @@
 (ns mermaid-clj.sequence
-  (:require [clojure.core.match :refer [match]]
-            [clojure.string :as string]))
-
-(defmacro use-like-this [& _])
+  (:require [clojure.string :as string]))
 
 (defn make-indent [indent]
   (string/join (for [_ (range indent)] " ")))
@@ -16,11 +13,11 @@
         :else                    "rgb(0,0,0,0)")) ; fall back to black
 
 (defn append-activate [arrow-str activate deactivate]
-  (match [activate deactivate]
+  (condp = [activate deactivate]
     [false false] arrow-str
-    [true false] (str arrow-str "+")
-    [false true] (str arrow-str "-")
-    [true true] (throw (IllegalArgumentException.))))
+    [true  false] (str arrow-str "+")
+    [false true]  (str arrow-str "-")
+    [true  true]  (throw (IllegalArgumentException.))))
 
 (defn arrow->str
   "Get the arrow representation of a given arrow."
@@ -29,15 +26,15 @@
         type2      (name (arrow :type))
         activate   (arrow :activate)
         deactivate (arrow :deactivate)]
-    (match [(name type1) (name type2)]
-      ["solid" "line"] (append-activate "->" activate deactivate)
-      ["solid" "arrow"] (append-activate "->>" activate deactivate)
-      ["solid" "cross"] (append-activate "-x" activate deactivate)
-      ["solid" "open"] (append-activate "-)" activate deactivate)
-      ["dotted" "line"] (append-activate "-->" activate deactivate)
+    (condp = [(name type1) (name type2)]
+      ["solid"  "line"]  (append-activate "->" activate deactivate)
+      ["solid"  "arrow"] (append-activate "->>" activate deactivate)
+      ["solid"  "cross"] (append-activate "-x" activate deactivate)
+      ["solid"  "open"]  (append-activate "-)" activate deactivate)
+      ["dotted" "line"]  (append-activate "-->" activate deactivate)
       ["dotted" "arrow"] (append-activate "-->>" activate deactivate)
       ["dotted" "cross"] (append-activate "--x" activate deactivate)
-      ["dotted" "open"] (append-activate "--)" activate deactivate))))
+      ["dotted" "open"]  (append-activate "--)" activate deactivate))))
 
 ;; ============ DSL APIs ============
 
@@ -78,9 +75,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (solid-line :alice :bob "hihi")
-    (solid-line 'bob 'alice "hoho"))
   {:type       :solid/line
    :from       actor-from
    :to         actor-to
@@ -93,9 +87,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (solid-arrow :alice :bob "hihi")
-    (solid-arrow 'bob 'alice "hoho"))
   {:type       :solid/arrow
    :from       actor-from
    :to         actor-to
@@ -108,9 +99,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (solid-cross :alice :bob "hihi")
-    (solid-cross 'bob 'alice "hoho"))
   {:type       :solid/cross
    :from       actor-from
    :to         actor-to
@@ -123,9 +111,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (solid-open :alice :bob "hihi")
-    (solid-open 'bob 'alice "hoho"))
   {:type       :solid/open
    :from       actor-from
    :to         actor-to
@@ -138,9 +123,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (dotted-line :alice :bob "hihi")
-    (dotted-line 'bob 'alice "hoho"))
   {:type       :dotted/line
    :from       actor-from
    :to         actor-to
@@ -153,9 +135,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (dotted-arrow :alice :bob "hihi")
-    (dotted-arrow 'bob 'alice "hoho"))
   {:type       :dotted/arrow
    :from       actor-from
    :to         actor-to
@@ -168,9 +147,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (dotted-cross :alice :bob "hihi")
-    (dotted-cross 'bob 'alice "hoho"))
   {:type       :dotted/cross
    :from       actor-from
    :to         actor-to
@@ -183,9 +159,6 @@
   [actor-from actor-to message & {:keys [activate deactivate]
                                   :or   {activate   false
                                          deactivate false}}]
-  (use-like-this "all data can be a symbol, keyword, or a string."
-    (dotted-open :alice :bob "hihi")
-    (dotted-open 'bob 'alice "hoho"))
   {:type       :dotted/open
    :from       actor-from
    :to         actor-to
